@@ -12,7 +12,7 @@ export async function POST(req: NextRequest)
 Read the following Arabic story chapter written for children:
 "${chapter.trim()}"
 
-Generate one colorful, storybook-style cartoony-not realistic illustration that visually represents the main scene and mood of this chapter.
+Generate one colorful, storybook-style cartoony-not realistic illustration that visually represents the main scene and mood of this chapter. Must be Cartoonish and not realistic.
         `.trim()
 
         const res = await fetch('https://api.fanar.qa/v1/images/generations', {
