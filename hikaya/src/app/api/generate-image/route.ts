@@ -7,7 +7,7 @@ export async function POST(req: NextRequest)
     try
     {
         const { chapter } = await req.json()
-
+        console.log("Hit with chapter: ", chapter)
         const prompt = `
 Read the following Arabic story chapter written for children:
 "${chapter.trim()}"

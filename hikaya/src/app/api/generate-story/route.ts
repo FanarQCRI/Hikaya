@@ -57,6 +57,7 @@ DO NOT include any extra explanation, notes, or text — only the story in Arabi
         const json = await res.json()
         //console.log('Fanar response:', JSON.stringify(json, null, 2))
         const content = json.choices?.[0]?.message?.content?.trim() ?? ''
+        console.log(content)
         return NextResponse.json({ story: content })
 
     }
