@@ -9,6 +9,7 @@ import Image from 'next/image'
 import type { Story, StoryPage } from '@/types'
 import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { getStoryFromIndexedDB } from '@/lib/utils'
 
 export default function StoryPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -19,13 +20,12 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Load story from localStorage (in a real app, you'd fetch from API)
-    const storyData = localStorage.getItem('currentStory')
-    if (storyData) {
-      const parsedStory = JSON.parse(storyData)
-      setStory(parsedStory)
-    }
-    setIsLoading(false)
+    // Load story from IndexedDB
+    setIsLoading(true)
+    getStoryFromIndexedDB(params.id).then((result) => {
+      if (result) setStory(result)
+      setIsLoading(false)
+    })
   }, [])
 
   const handleNextPage = () => {
@@ -147,51 +147,14 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                   className="space-y-6"
+                  {...({} as any)}
                 >
                   {/* Arabic Text */}
                   <div className="space-y-4">
                     <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic">
                       {currentPageData.arabicText}
                     </div>
-
-                    {/* English Translation Toggle */}
-                    <button
-                      onClick={() => setShowEnglish(!showEnglish)}
-                      className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary-light transition-colors"
-                    >
-                      <Globe className="w-4 h-4" />
-                      {showEnglish ? 'إخفاء الترجمة' : 'عرض الترجمة'}
-                    </button>
-
-                    {/* English Text */}
-                    <AnimatePresence>
-                      {showEnglish && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="english-text text-lg text-text-english/80 bg-warm-light/50 p-4 rounded-lg"
-                        >
-                          {currentPageData.englishText}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
-
-                  {/* Audio Button */}
-                  <button
-                    onClick={() => handlePlayAudio(currentPageData)}
-                    disabled={isPlayingAudio}
-                    className={cn(
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300",
-                      isPlayingAudio
-                        ? "bg-primary-light text-white"
-                        : "bg-primary/10 text-primary hover:bg-primary/20"
-                    )}
-                  >
-                    <Volume2 className={cn("w-5 h-5", isPlayingAudio && "animate-pulse")} />
-                    {isPlayingAudio ? 'جاري التشغيل...' : 'استماع'}
-                  </button>
                 </motion.div>
               </AnimatePresence>
             </div>

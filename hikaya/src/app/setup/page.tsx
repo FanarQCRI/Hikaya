@@ -9,6 +9,7 @@ import { themeOptions } from '@/data/themes'
 import { StoryConfig } from '@/types'
 import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { saveStoryToIndexedDB } from '@/lib/utils'
 
 export default function SetupPage() {
   const router = useRouter()
@@ -42,8 +43,8 @@ export default function SetupPage() {
 
       const story = await HikayatAPI.generateStory(config)
       
-      // Store story in localStorage for now (in a real app, you'd use a state management solution)
-      localStorage.setItem('currentStory', JSON.stringify(story))
+      // Store story in IndexedDB
+      await saveStoryToIndexedDB(story.id, story)
       
       router.push(`/story/${story.id}`)
     } catch (error) {
