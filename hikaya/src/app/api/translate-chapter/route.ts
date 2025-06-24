@@ -2,34 +2,50 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const FANAR_KEY = process.env.FANAR_API_KEY!
 
+// Utility function to clean Arabic chapter text
+function cleanArabicText(text: string): string
+{
+    return text
+        // Remove bracketed tags like [العنوان], [الفصل الأول]
+        .replace(/\[[^\]]*\]/g, '')
+        // Remove lines starting with section markers like "الفصل", "العنوان", "Chapter", etc.
+        .replace(/^(الفصل|العنوان|chapter|title|section).*$/gim, '')
+        // Remove separators like "---" or "———"
+        .replace(/^[-–—\s]*$/gm, '')
+        // Remove all English-only words
+        .replace(/\b[a-zA-Z]+\b/g, '')
+        // Remove remaining colons that follow empty tags or sections
+        .replace(/^\s*:\s*/gm, '')
+        // Collapse multiple blank lines into a single line
+        .replace(/\n{2,}/g, '\n')
+        // Remove leading/trailing whitespace and newlines
+        .trim()
+}
+
 export async function POST(req: NextRequest)
 {
     try
     {
         const { chapter } = await req.json()
 
-        const prompt = `
-Translate the following Arabic story excerpt into English (preserve the tone and style for children):
+        const cleanedText = cleanArabicText(chapter)
 
-${chapter.trim()}
-        `.trim()
-
-        const res = await fetch('https://api.fanar.qa/v1/chat/completions', {
+        const res = await fetch('https://api.fanar.qa/v1/translations', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${FANAR_KEY}`,
+                Authorization: `Bearer ${FANAR_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'Fanar-S-1-7B',
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.5
+                model: 'Fanar-Shaheen-MT-1',
+                langpair: 'ar-en',
+                text: cleanedText
             })
         })
-        
+
         const json = await res.json()
-        console.log('Fanar response:', JSON.stringify(json, null, 2))
-        const translation = json.choices?.[0]?.message?.content?.trim() ?? ''
+        const raw = json.text ?? ''
+        const translation = raw.replace(/\s*\n\s*/g, ' ').trim()
         return NextResponse.json({ translation })
 
     }
