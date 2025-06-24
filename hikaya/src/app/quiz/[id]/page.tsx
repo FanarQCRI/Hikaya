@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Star } from 'lucide-react'
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Star, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import type { Story, Question } from '@/types'
 import { HikayatAPI } from '@/lib/api'
@@ -169,15 +169,15 @@ export default function QuizPage({ params }: { params: { id: string } }) {
                 onClick={handlePlayAgain}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
               >
-                <Star className="w-5 h-5" />
                 قصة جديدة
+                <Star className="w-5 h-5" />
               </button>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-warm-light/50 text-text-arabic rounded-full hover:bg-warm-light transition-all duration-300"
               >
-                <ArrowLeft className="w-5 h-5" />
                 العودة للصفحة الرئيسية
+                <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
           </motion.div>

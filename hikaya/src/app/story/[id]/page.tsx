@@ -111,8 +111,8 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
               href="/setup"
               className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
               العودة
+              <ArrowRight className="w-5 h-5" />
             </Link>
             
             <div className="text-center">
@@ -182,8 +182,8 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                     : "text-primary hover:bg-primary/10"
                 )}
               >
+                التالي
                 <ChevronLeft className="w-5 h-5" />
-                السابق
               </button>
 
               {/* Page Indicator */}
@@ -208,14 +208,14 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
                 >
                   انتهت القصة
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowLeft className="w-5 h-5" />
                 </button>
               ) : (
                 <button
                   onClick={handleNextPage}
                   className="inline-flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-full transition-all duration-300"
                 >
-                  التالي
+                  السابق
                   <ChevronRight className="w-5 h-5" />
                 </button>
               )}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, BookOpen, Star, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Star, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { themeOptions } from '@/data/themes'
 import { StoryConfig } from '@/types'
@@ -80,8 +80,8 @@ export default function SetupPage() {
             href="/"
             className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english mb-8 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
             العودة للصفحة الرئيسية
+            <ArrowRight className="w-5 h-5" />
           </Link>
 
           <div className="text-center mb-12">
