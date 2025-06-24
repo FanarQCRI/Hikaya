@@ -29,6 +29,8 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [showEnglish, setShowEnglish] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showTranslation, setShowTranslation] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     // Load story from IndexedDB
@@ -129,10 +131,10 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       </div>
 
       {/* Story Content */}
-      <div className="max-w-5xl mx-auto px-2 py-8">
+      <div className="max-w-7xl mx-auto px-2 py-12">
         <div className="relative flex flex-col md:flex-row-reverse items-stretch bg-[#fdf6e3] rounded-[2.5rem] shadow-2xl border border-warm overflow-hidden min-h-[500px]">
           {/* Right page (text) */}
-          <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:py-16 md:pr-12 md:pl-8">
+          <div className="flex-1 flex flex-col justify-center items-center px-10 py-14 md:py-20 md:pr-20 md:pl-14">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -144,9 +146,41 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                 {...({} as any)}
               >
                 <div className="space-y-4">
-                  <div className="arabic-text text-3xl md:text-4xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center" style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
-                    {cleanSectionText(currentPageData.arabicText)}
+                  {currentPage === 0 ? (
+                    <div className="arabic-text text-4xl md:text-5xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center font-bold" style={{ fontWeight: 800, letterSpacing: '-0.01em', maxWidth: '100%', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                      {cleanSectionText(currentPageData.arabicText)}
+                    </div>
+                  ) : (
+                    <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic font-[Noto Sans Arabic,sans-serif] text-center" style={{ fontWeight: 600, letterSpacing: '-0.01em', maxWidth: '95%', wordBreak: 'break-word', overflowWrap: 'break-word', color: '#7c4a03' }}>
+                      {cleanSectionText(currentPageData.arabicText)}
+                    </div>
+                  )}
+                  {/* Mock Translate and Listen buttons */}
+                  <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-14">
+                    <button
+                      onClick={() => setShowTranslation(v => !v)}
+                      className="px-6 py-2 rounded-full bg-blue-200 text-blue-900 font-bold shadow hover:bg-blue-300 transition-all text-lg flex items-center gap-2"
+                    >
+                      <Globe className="w-5 h-5" />
+                      {showTranslation ? 'إخفاء الترجمة' : 'ترجمة إلى الإنجليزية'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsPlaying(true);
+                        setTimeout(() => setIsPlaying(false), 2000);
+                      }}
+                      className="px-6 py-2 rounded-full bg-orange-400 text-white font-bold shadow hover:bg-orange-500 transition-all text-lg flex items-center gap-2"
+                    >
+                      <Volume2 className={isPlaying ? 'animate-pulse' : ''} />
+                      {isPlaying ? 'يتم التشغيل...' : 'استمع للنص'}
+                    </button>
                   </div>
+                  {/* Mock English translation */}
+                  {showTranslation && (
+                    <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>
+                      This is a sample English translation of the story text. (Replace with real translation.)
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -156,7 +190,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
             <div className="absolute left-1/2 top-0 h-full w-1 bg-gradient-to-b from-[#e2cfa1] via-[#fff8dc] to-[#e2cfa1] rounded-full shadow-lg opacity-80" style={{ filter: 'blur(1.5px)' }} />
           </div>
           {/* Left page (image) */}
-          <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:py-16 md:pl-12 md:pr-8">
+          <div className="flex-1 flex flex-col justify-center items-center px-10 py-14 md:py-20 md:pl-20 md:pr-14">
             <div className="relative w-full max-w-sm flex justify-center items-center">
               <Image
                 src={currentPageData.imageUrl}
