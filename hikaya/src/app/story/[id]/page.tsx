@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight, Volume2, Globe, ChevronLeft, ChevronRight } from
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Story, StoryPage } from '@/types'
-import { HikayatAPI } from '@/lib/api'
+import { HikayatAPI, fetchStoryTranslationsInBackground } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { getStoryFromIndexedDB } from '@/lib/utils'
 import React from 'react'
@@ -38,6 +38,13 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
     getStoryFromIndexedDB(id).then((result) => {
       if (result) setStory(result)
       setIsLoading(false)
+      // Start background translation if needed
+      if (result && result.pages.some((p: StoryPage, idx: number) => idx !== 0 && !p.englishText)) {
+        fetchStoryTranslationsInBackground(result).then(updated => {
+          setStory(updated)
+          // Optionally, save updated story to IndexedDB here
+        })
+      }
     })
   }, [id])
 
@@ -178,7 +185,9 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                   {/* Mock English translation */}
                   {showTranslation && (
                     <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>
-                      This is a sample English translation of the story text. (Replace with real translation.)
+                      {currentPageData.englishText
+                        ? currentPageData.englishText
+                        : 'Translating...'}
                     </div>
                   )}
                 </div>

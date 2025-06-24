@@ -100,4 +100,31 @@ export class HikayatAPI {
     // The first section is always the title
     return sections[0] || 'قصة جديدة'
   }
+}
+
+// Utility to clean section markers and special characters from story text
+function cleanSectionText(text: string) {
+  return text
+    .replace(/^\s*(\[.*?\]|Title|العنوان|Chapter ?\d+|الفصل ?\d+)[\s:：\-*]*\**\s*/i, '')
+    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/g, '')
+    .trim();
+}
+
+// Fetch translations for all story pages (except title) in the background
+export async function fetchStoryTranslationsInBackground(story: Story): Promise<Story> {
+  const updatedPages = await Promise.all(story.pages.map(async (page) => {
+    try {
+      const res = await fetch('/api/translate-chapter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chapter: cleanSectionText(page.arabicText) }),
+      });
+      if (res.ok) {
+        const { translation } = await res.json();
+        return { ...page, englishText: translation };
+      }
+    } catch {}
+    return page;
+  }));
+  return { ...story, pages: updatedPages };
 } 

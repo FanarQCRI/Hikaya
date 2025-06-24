@@ -26,7 +26,7 @@ ${chapter.trim()}
                 temperature: 0.5
             })
         })
-
+        
         const json = await res.json()
         console.log('Fanar response:', JSON.stringify(json, null, 2))
         const translation = json.choices?.[0]?.message?.content?.trim() ?? ''
