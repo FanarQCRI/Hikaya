@@ -2,27 +2,40 @@ import type { StoryConfig, Story, StoryPage } from '@/types'
 
 export class HikayatAPI {
   static async generateStory(config: StoryConfig): Promise<Story> {
-    const response = await fetch('/api/generate-story', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        keywords: config.theme,
-        level: config.difficulty,
-      }),
-    })
+    let attempts = 0;
+    let sections: string[] = [];
+    let arabicStory = '';
+    const maxAttempts = 20;
+    while (attempts < maxAttempts) {
+      const response = await fetch('/api/generate-story', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keywords: config.theme,
+          level: config.difficulty,
+        }),
+      })
 
-    if (!response.ok) {
-      throw new Error('Failed to generate story')
+      if (!response.ok) {
+        attempts++;
+        await new Promise(res => setTimeout(res, 500));
+        continue;
+      }
+
+      const data = await response.json();
+      arabicStory = data.story;
+      sections = this.parseStorySections(arabicStory);
+      if (sections.length === 5) {
+        break;
+      }
+      attempts++;
+      await new Promise(res => setTimeout(res, 500));
     }
-
-    const { story: arabicStory } = await response.json()
-
-    // Parse the story into 5 sections: title and 4 chapters
-    const sections = this.parseStorySections(arabicStory)
     if (sections.length !== 5) {
-      throw new Error('Story parsing failed: expected 5 sections (title + 4 chapters)')
+      // As a last resort, just return the whole story as one section
+      sections = [arabicStory, '', '', '', ''];
     }
 
     // Generate images for each section

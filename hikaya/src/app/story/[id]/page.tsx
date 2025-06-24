@@ -10,6 +10,7 @@ import type { Story, StoryPage } from '@/types'
 import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { getStoryFromIndexedDB } from '@/lib/utils'
+import React from 'react'
 
 // Utility to clean section markers and special characters from story text
 function cleanSectionText(text: string) {
@@ -17,8 +18,9 @@ function cleanSectionText(text: string) {
   return text.replace(/^\s*\[.*?\]:?\s*/i, '').replace(/^\s*\*+\s*/g, '').trim()
 }
 
-export default function StoryPage({ params }: { params: { id: string } }) {
+export default function StoryPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const { id } = React.use(params)
   const [story, setStory] = useState<Story | null>(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [showEnglish, setShowEnglish] = useState(false)
@@ -28,11 +30,11 @@ export default function StoryPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     // Load story from IndexedDB
     setIsLoading(true)
-    getStoryFromIndexedDB(params.id).then((result) => {
+    getStoryFromIndexedDB(id).then((result) => {
       if (result) setStory(result)
       setIsLoading(false)
     })
-  }, [])
+  }, [id])
 
   const handleNextPage = () => {
     if (story && currentPage < story.pages.length - 1) {
