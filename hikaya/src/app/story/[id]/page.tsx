@@ -14,8 +14,11 @@ import React from 'react'
 
 // Utility to clean section markers and special characters from story text
 function cleanSectionText(text: string) {
-  // Remove markers like [Title]:, [العنوان]:, [Chapter 1]:, [الفصل 1]:, etc. at the start
-  return text.replace(/^\s*\[.*?\]:?\s*/i, '').replace(/^\s*\*+\s*/g, '').trim()
+  // Remove any leading marker (with or without brackets), colons, asterisks, dashes, or whitespace, e.g. [Chapter 1]:**, [الفصل 1]:**, Title:**, etc.
+  return text
+    .replace(/^\s*(\[.*?\]|Title|العنوان|Chapter ?\d+|الفصل ?\d+)[\s:：\-*]*\**\s*/i, '') // Remove leading marker and all special chars after
+    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/g, '') // Remove any remaining leading/trailing special chars
+    .trim();
 }
 
 export default function StoryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -117,9 +120,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
             
             <div className="text-center">
               <h1 className="text-xl font-semibold text-text-arabic">{cleanSectionText(story.title)}</h1>
-              <p className="text-sm text-text-english/70">
-                صفحة {currentPage + 1} من {story.pages.length}
-              </p>
+              {/* Removed page counter for a cleaner UI */}
             </div>
 
             <div className="w-20"></div> {/* Spacer for centering */}
@@ -182,8 +183,10 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                     : "text-primary hover:bg-primary/10"
                 )}
               >
-                التالي
-                <ChevronLeft className="w-5 h-5" />
+                {/* التالي */}
+                <ChevronRight className="w-5 h-5" />
+                السابق
+                
               </button>
 
               {/* Page Indicator */}
@@ -215,8 +218,9 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                   onClick={handleNextPage}
                   className="inline-flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-full transition-all duration-300"
                 >
-                  السابق
-                  <ChevronRight className="w-5 h-5" />
+                  {/* السابق */}
+                  التالي
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
               )}
             </div>
