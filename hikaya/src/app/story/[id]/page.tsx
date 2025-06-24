@@ -11,6 +11,12 @@ import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { getStoryFromIndexedDB } from '@/lib/utils'
 
+// Utility to clean section markers and special characters from story text
+function cleanSectionText(text: string) {
+  // Remove markers like [Title]:, [العنوان]:, [Chapter 1]:, [الفصل 1]:, etc. at the start
+  return text.replace(/^\s*\[.*?\]:?\s*/i, '').replace(/^\s*\*+\s*/g, '').trim()
+}
+
 export default function StoryPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [story, setStory] = useState<Story | null>(null)
@@ -108,7 +114,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
             </Link>
             
             <div className="text-center">
-              <h1 className="text-xl font-semibold text-text-arabic">{story.title}</h1>
+              <h1 className="text-xl font-semibold text-text-arabic">{cleanSectionText(story.title)}</h1>
               <p className="text-sm text-text-english/70">
                 صفحة {currentPage + 1} من {story.pages.length}
               </p>
@@ -152,7 +158,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
                   {/* Arabic Text */}
                   <div className="space-y-4">
                     <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic">
-                      {currentPageData.arabicText}
+                      {cleanSectionText(currentPageData.arabicText)}
                     </div>
                   </div>
                 </motion.div>
