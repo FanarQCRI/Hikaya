@@ -117,7 +117,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
     <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm">
       {/* Header */}
       <div className="w-full px-4 py-4">
-        <div className="flex justify-center pl-[600px] pt-8">
+        <div className="flex justify-center pl-[1000px] pt-8">
           <Link
             href="/setup"
             className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english mb-8 transition-colors text-lg font-medium"
