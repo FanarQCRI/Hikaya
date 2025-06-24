@@ -116,25 +116,22 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-warm/20">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/setup"
-              className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english transition-colors"
-            >
-              العودة
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            
-            <div className="text-center">
-              <h1 className="text-xl font-semibold text-text-arabic">{cleanSectionText(story.title)}</h1>
-              {/* Removed page counter for a cleaner UI */}
-            </div>
-
-            <div className="w-20"></div> {/* Spacer for centering */}
-          </div>
+      <div className="w-full px-4 py-4">
+        <div className="flex justify-center pl-[600px] pt-8">
+          <Link
+            href="/setup"
+            className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english mb-8 transition-colors text-lg font-medium"
+          >
+            العودة للصفحة السابقة
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
+      </div>
+      {/* Story Title (now below header, above content) */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-text-arabic mb-2">
+          {cleanSectionText(story.title)}
+        </h1>
       </div>
 
       {/* Story Content */}
