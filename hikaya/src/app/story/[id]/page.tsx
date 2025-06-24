@@ -129,101 +129,100 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       </div>
 
       {/* Story Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
-          {/* Page Content */}
-          <div className="relative min-h-[600px] flex flex-col md:flex-row">
-            {/* Image Section */}
-            <div className="w-full md:w-1/2 p-8 flex items-center justify-center bg-gradient-to-br from-accent-light to-warm-light">
-              <div className="relative w-full max-w-sm">
-                <Image
-                  src={currentPageData.imageUrl}
-                  alt="Story illustration"
-                  width={400}
-                  height={300}
-                  className="rounded-2xl shadow-lg w-full h-auto"
-                />
-              </div>
-            </div>
-
-            {/* Text Section */}
-            <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentPage}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                  {...({} as any)}
-                >
-                  {/* Arabic Text */}
-                  <div className="space-y-4">
-                    <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic">
-                      {cleanSectionText(currentPageData.arabicText)}
-                    </div>
+      <div className="max-w-5xl mx-auto px-2 py-8">
+        <div className="relative flex flex-col md:flex-row-reverse items-stretch bg-[#fdf6e3] rounded-[2.5rem] shadow-2xl border border-warm overflow-hidden min-h-[500px]">
+          {/* Right page (text) */}
+          <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:py-16 md:pr-12 md:pl-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+                {...({} as any)}
+              >
+                <div className="space-y-4">
+                  <div className="arabic-text text-3xl md:text-4xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center" style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+                    {cleanSectionText(currentPageData.arabicText)}
                   </div>
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          {/* Center spine */}
+          <div className="hidden md:block w-3 relative z-20">
+            <div className="absolute left-1/2 top-0 h-full w-1 bg-gradient-to-b from-[#e2cfa1] via-[#fff8dc] to-[#e2cfa1] rounded-full shadow-lg opacity-80" style={{ filter: 'blur(1.5px)' }} />
+          </div>
+          {/* Left page (image) */}
+          <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:py-16 md:pl-12 md:pr-8">
+            <div className="relative w-full max-w-sm flex justify-center items-center">
+              <Image
+                src={currentPageData.imageUrl}
+                alt="Story illustration"
+                width={400}
+                height={300}
+                className="rounded-2xl shadow-lg w-full h-auto"
+              />
             </div>
           </div>
+        </div>
 
-          {/* Navigation */}
-          <div className="bg-warm-light/30 p-6 border-t border-warm/20">
-            <div className="flex items-center justify-between">
-              {/* Previous Button */}
-              <button
-                onClick={handlePrevPage}
-                disabled={isFirstPage}
-                className={cn(
-                  "inline-flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
-                  isFirstPage
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-primary hover:bg-primary/10"
-                )}
-              >
-                {/* التالي */}
-                <ChevronRight className="w-5 h-5" />
-                السابق
-                
-              </button>
-
-              {/* Page Indicator */}
-              <div className="flex items-center gap-2">
-                {story.pages.map((_, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "w-3 h-3 rounded-full transition-all duration-300",
-                      index === currentPage
-                        ? "bg-primary"
-                        : "bg-primary/30"
-                    )}
-                  />
-                ))}
-              </div>
-
-              {/* Next/Finish Button */}
-              {isLastPage ? (
-                <button
-                  onClick={handleFinishStory}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
-                >
-                  انتهت القصة
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextPage}
-                  className="inline-flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-full transition-all duration-300"
-                >
-                  {/* السابق */}
-                  التالي
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
+        {/* Navigation */}
+        <div className="bg-warm-light/30 p-6 border-t border-warm/20">
+          <div className="flex items-center justify-between">
+            {/* Previous Button */}
+            <button
+              onClick={handlePrevPage}
+              disabled={isFirstPage}
+              className={cn(
+                "inline-flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
+                isFirstPage
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-primary hover:bg-primary/10"
               )}
+            >
+              {/* التالي */}
+              <ChevronRight className="w-5 h-5" />
+              السابق
+              
+            </button>
+
+            {/* Page Indicator */}
+            <div className="flex items-center gap-2">
+              {story.pages.map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "w-3 h-3 rounded-full transition-all duration-300",
+                    index === currentPage
+                      ? "bg-primary"
+                      : "bg-primary/30"
+                  )}
+                />
+              ))}
             </div>
+
+            {/* Next/Finish Button */}
+            {isLastPage ? (
+              <button
+                onClick={handleFinishStory}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
+              >
+                انتهت القصة
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                onClick={handleNextPage}
+                className="inline-flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-full transition-all duration-300"
+              >
+                {/* السابق */}
+                التالي
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
