@@ -1,4 +1,5 @@
 import type { StoryConfig, Story, StoryPage } from '@/types'
+import { cleanChapterText } from '@/lib/utils'
 
 export class HikayatAPI {
   static async generateStory(config: StoryConfig): Promise<Story> {
@@ -41,7 +42,7 @@ export class HikayatAPI {
     // Generate images for each section
     const pages: StoryPage[] = []
     for (let i = 0; i < sections.length; i++) {
-      const sectionText = sections[i]
+      const sectionText = cleanChapterText(sections[i])
       // Generate image for the section
       const imageResponse = await fetch('/api/generate-image', {
         method: 'POST',
@@ -118,15 +119,15 @@ export class HikayatAPI {
     const questions: any[] = []
     const raw = data.questions || ''
     console.log('LLM MCQ raw output:', raw)
-    const questionBlocks = raw.split(/\n(?=\d+\.)/).map(q => q.trim()).filter(Boolean)
+    const questionBlocks = raw.split(/\n(?=\d+\.)/).map((q: string) => q.trim()).filter(Boolean)
     for (const block of questionBlocks) {
-      const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
+      const lines = block.split('\n').map((l: string) => l.trim()).filter(Boolean)
       if (lines.length < 6) continue
       let arabicText = lines[0].replace(/^\d+\.\s*/, '')
-      const options = lines.slice(1, 5).map(opt => opt.replace(/^[أ-دA-D]\.\s*/, ''))
+      const options = lines.slice(1, 5).map((opt: string) => opt.replace(/^[أ-دA-D]\.\s*/, ''))
       // Skip if question is just 'السؤال' or empty, or if any option looks like a question
-      if (arabicText === 'السؤال' || !arabicText || options.some(opt => opt.includes('السؤال'))) continue
-      const correctLine = lines.find(l => l.startsWith('الإجابة الصحيحة')) || ''
+      if (arabicText === 'السؤال' || !arabicText || options.some((opt: string) => opt.includes('السؤال'))) continue
+      const correctLine = lines.find((l: string) => l.startsWith('الإجابة الصحيحة')) || ''
       // Accept both Arabic and English answer letters, even if followed by a dot or text
       const correctLetterMatch = correctLine.match(/[:：]\s*([أ-دA-D])/)
       if (!correctLetterMatch) continue // skip if not found
@@ -147,14 +148,6 @@ export class HikayatAPI {
   }
 }
 
-// Utility to clean section markers and special characters from story text
-function cleanSectionText(text: string) {
-  return text
-    .replace(/^\s*(\[.*?\]|Title|العنوان|Chapter ?\d+|الفصل ?\d+)[\s:：\-*]*\**\s*/i, '')
-    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/g, '')
-    .trim();
-}
-
 // Fetch translations for all story pages (except title) in the background
 export async function fetchStoryTranslationsInBackground(story: Story): Promise<Story> {
   const updatedPages = await Promise.all(story.pages.map(async (page) => {
@@ -162,7 +155,7 @@ export async function fetchStoryTranslationsInBackground(story: Story): Promise<
       const res = await fetch('/api/translate-chapter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chapter: cleanSectionText(page.arabicText) }),
+        body: JSON.stringify({ chapter: cleanChapterText(page.arabicText) }),
       });
       if (res.ok) {
         const { translation } = await res.json();

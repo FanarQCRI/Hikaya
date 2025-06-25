@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cleanChapterText } from '@/lib/utils'
 
 const FANAR_KEY = process.env.FANAR_API_KEY!
 
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest)
     {
         const { chapter } = await req.json()
 
-        const cleanedText = cleanArabicText(chapter)
+        const cleanedText = cleanChapterText(chapter)
 
         const res = await fetch('https://api.fanar.qa/v1/translations', {
             method: 'POST',

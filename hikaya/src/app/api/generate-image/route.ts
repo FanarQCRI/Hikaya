@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cleanChapterText } from '@/lib/utils'
 
 const FANAR_KEY = process.env.FANAR_API_KEY!
 
@@ -7,10 +8,11 @@ export async function POST(req: NextRequest)
     try
     {
         const { chapter } = await req.json()
-        console.log("Hit with chapter: ", chapter)
+        const cleanedChapter = cleanChapterText(chapter)
+        console.log("Hit with chapter: ", cleanedChapter)
         const prompt = `
 Read the following Arabic story chapter written for children:
-"${chapter.trim()}"
+"${cleanedChapter}"
 
 Generate one colorful, storybook-style cartoony-not realistic illustration that visually represents the main scene and mood of this chapter. Must be Cartoonish and not realistic.
         `.trim()

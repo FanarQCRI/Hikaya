@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { cleanChapterText } from '@/lib/utils'
 
 const FANAR_KEY = process.env.FANAR_API_KEY
 
@@ -7,15 +8,15 @@ export async function POST(req: NextRequest)
     try
     {
         const { story } = await req.json()
-        
-        if (!story || typeof story !== 'string') {
+        const cleanedStory = cleanChapterText(story)
+        if (!cleanedStory || typeof cleanedStory !== 'string') {
             return new Response(JSON.stringify({ error: 'Invalid story text provided' }), { 
                 status: 400,
                 headers: { 'Content-Type': 'application/json' }
             })
         }
 
-        console.log('Generating TTS for text:', story.substring(0, 100) + '...')
+        console.log('Generating TTS for text:', cleanedStory.substring(0, 100) + '...')
         
         const res = await fetch('https://api.fanar.qa/v1/audio/speech', {
             method: 'POST',
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest)
             },
             body: JSON.stringify({
                 model: 'Fanar-Aura-TTS-1',
-                input: story,
+                input: cleanedStory,
                 voice: 'default', // Using 'default' voice as required by the API
                 format: 'mp3'
             })

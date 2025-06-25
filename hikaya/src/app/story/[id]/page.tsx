@@ -12,15 +12,7 @@ import { cn } from '@/lib/utils'
 import { getStoryFromIndexedDB } from '@/lib/utils'
 import { generateAudioFromText, playAudio, stopAudio } from '@/lib/audio'
 import React from 'react'
-
-// Utility to clean section markers and special characters from story text
-function cleanSectionText(text: string) {
-  // Remove any leading marker (with or without brackets), colons, asterisks, dashes, or whitespace, e.g. [Chapter 1]:**, [الفصل 1]:**, Title:**, etc.
-  return text
-    .replace(/^\s*(\[.*?\]|Title|العنوان|Chapter ?\d+|الفصل ?\d+)[\s:：\-*]*\**\s*/i, '') // Remove leading marker and all special chars after
-    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/g, '') // Remove any remaining leading/trailing special chars
-    .trim();
-}
+import { cleanChapterText } from '@/lib/utils'
 
 export default function StoryPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -119,7 +111,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       setIsGeneratingAudio(true)
 
       // Generate audio for the current page text
-      const cleanText = cleanSectionText(page.arabicText)
+      const cleanText = cleanChapterText(page.arabicText)
       const generatedAudioUrl = await generateAudioFromText(cleanText)
       
       setAudioUrl(generatedAudioUrl)
@@ -235,7 +227,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       {/* Story Title (now below header, above content) */}
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-extrabold text-text-arabic mb-2">
-          {cleanSectionText(story.title)}
+          {cleanChapterText(story.title)}
         </h1>
       </div>
 
@@ -257,11 +249,11 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                 <div className="space-y-4">
                   {currentPage === 0 ? (
                     <div className="arabic-text text-4xl md:text-5xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center font-bold" style={{ fontWeight: 800, letterSpacing: '-0.01em', maxWidth: '100%', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                      {cleanSectionText(currentPageData.arabicText)}
+                      {cleanChapterText(currentPageData.arabicText)}
                     </div>
                   ) : (
                     <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic font-[Noto Sans Arabic,sans-serif] text-center" style={{ fontWeight: 600, letterSpacing: '-0.01em', maxWidth: '95%', wordBreak: 'break-word', overflowWrap: 'break-word', color: '#7c4a03' }}>
-                      {cleanSectionText(currentPageData.arabicText)}
+                      {cleanChapterText(currentPageData.arabicText)}
                     </div>
                   )}
                   {/* Real Translate and Listen buttons */}

@@ -62,4 +62,28 @@ export async function getStoryFromIndexedDB(key: string): Promise<any | null> {
       reject(e)
     }
   })
+}
+
+/**
+ * Cleans chapter or title text by removing section markers (Title, Chapter, العنوان, الفصل, etc.), asterisks, dashes, colons, English words, and extra whitespace.
+ * Handles both Arabic and English, any capitalization, and special characters.
+ */
+export function cleanChapterText(text: string): string {
+  return text
+    // Remove bracketed tags like [العنوان], [الفصل الأول], [Title], [Chapter 1]
+    .replace(/\[[^\]]*\]/gi, '')
+    // Remove lines starting with section markers (arabic/english, any case)
+    .replace(/^(الفصل|العنوان|chapter|title|section)\s*\d*.*$/gim, '')
+    // Remove explicit markers in-line (Title, Chapter 1, etc.)
+    .replace(/(Title|العنوان|Chapter ?\d*|الفصل ?\d*)/gi, '')
+    // Remove separators like --- or ——
+    .replace(/[-–—*]+/g, '')
+    // Remove all English-only words
+    .replace(/\b[a-zA-Z]+\b/g, '')
+    // Remove colons and similar after empty tags or sections
+    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/gm, '')
+    // Collapse multiple blank lines into a single line
+    .replace(/\n{2,}/g, '\n')
+    // Remove leading/trailing whitespace and newlines
+    .trim();
 } 
