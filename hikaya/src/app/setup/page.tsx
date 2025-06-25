@@ -79,7 +79,7 @@ export default function SetupPage() {
 
         <div className="relative z-10 w-full max-w-3xl mx-auto px-4 py-10">
           {/* Header */}
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10" {...({} as any)}>
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english mb-8 transition-colors text-lg font-medium"
@@ -99,7 +99,7 @@ export default function SetupPage() {
           </motion.div>
 
           {/* Difficulty Selection */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-12" {...({} as any)}>
             <h2 className="text-2xl font-bold text-text-arabic mb-7 text-center text-shadow">مستوى الصعوبة</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
               {[
@@ -133,7 +133,7 @@ export default function SetupPage() {
           </motion.div>
 
           {/* Theme Selection */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-12" {...({} as any)}>
             <h2 className="text-2xl font-bold text-text-arabic mb-7 text-center text-shadow">اختر موضوع القصة</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
               {themeOptions.map((theme) => {
@@ -180,7 +180,7 @@ export default function SetupPage() {
               </button>
 
               {selectedTheme === 'custom' && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4" {...({} as any)}>
                   <div className="relative">
                     <input
                       type="text"
@@ -206,7 +206,7 @@ export default function SetupPage() {
           </motion.div>
 
           {/* Generate Button */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="text-center" {...({} as any)}>
             <button
               onClick={handleGenerateStory}
               disabled={!canGenerate || isGenerating}

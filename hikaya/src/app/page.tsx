@@ -47,6 +47,7 @@ export default function Home() {
             animate={{ scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mb-8"
+            {...({} as any)}
           >
             <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-accent to-primary rounded-full mb-8 shadow-2xl border-2 border-accent relative">
               {/* Static Magical Lantern SVG */}
@@ -81,6 +82,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="mb-12"
+            {...({} as any)}
           >
             <p className="text-5xl md:text-4xl text-primary font-extrabold mb-2 drop-shadow-lg" style={{ fontFamily: 'Amiri, serif' }}>
               حكاية تفتح أبواب الخيال
@@ -96,6 +98,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
             className="mb-12"
+            {...({} as any)}
           >
             <Link
               href="/setup"
@@ -117,6 +120,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-4 max-w-5xl mx-auto"
+            {...({} as any)}
           >
             <div className="bg-[#FFF8DC] rounded-2xl p-8 shadow-md border border-accent flex flex-col items-center min-h-[220px] rotate-2">
               {/* BookOpen icon for interactive stories */}

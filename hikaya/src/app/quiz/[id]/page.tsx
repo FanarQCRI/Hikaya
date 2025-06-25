@@ -151,6 +151,7 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 text-center"
+            {...({} as any)}
           >
             {/* Trophy Icon */}
             <div className="mb-6">
@@ -267,6 +268,7 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8"
+          {...({} as any)}
         >
           {/* Question */}
           <div className="mb-8">

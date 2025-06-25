@@ -9,7 +9,7 @@ export async function POST(req: NextRequest)
     {
         const { chapter } = await req.json()
         const cleanedChapter = cleanChapterText(chapter)
-        console.log("Hit with chapter: ", cleanedChapter)
+        // console.log("Hit with chapter: ", cleanedChapter)
         const prompt = `
 Read the following Arabic story chapter written for children:
 "${cleanedChapter}"

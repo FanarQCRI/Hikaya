@@ -16,7 +16,7 @@ export async function POST(req: NextRequest)
             })
         }
 
-        console.log('Generating TTS for text:', cleanedStory.substring(0, 100) + '...')
+        // console.log('Generating TTS for text:', cleanedStory.substring(0, 100) + '...')
         
         const res = await fetch('https://api.fanar.qa/v1/audio/speech', {
             method: 'POST',

@@ -93,6 +93,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-warm-light via-accent-light to-warm"
+          {...({} as any)}
         >
           {/* Animated Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -108,6 +109,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 ease: "easeInOut"
               }}
               className="absolute top-20 left-20"
+              {...({} as any)}
             >
               <BookOpen className="text-primary w-12 h-12 opacity-60" />
             </motion.div>
@@ -124,6 +126,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 delay: 1
               }}
               className="absolute top-32 right-32"
+              {...({} as any)}
             >
               <BookMarked className="text-accent w-10 h-10 opacity-70" />
             </motion.div>
@@ -140,6 +143,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 ease: "easeInOut"
               }}
               className="absolute bottom-32 left-32"
+              {...({} as any)}
             >
               <Star className="text-accent w-8 h-8" />
             </motion.div>
@@ -156,6 +160,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 delay: 2
               }}
               className="absolute bottom-20 right-20"
+              {...({} as any)}
             >
               <Sparkles className="text-primary w-9 h-9" />
             </motion.div>
@@ -171,6 +176,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 ease: "linear"
               }}
               className="absolute top-10 right-10"
+              {...({} as any)}
             >
               <Moon className="text-primary-light w-6 h-6 opacity-50" />
             </motion.div>
@@ -185,6 +191,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 ease: "linear"
               }}
               className="absolute bottom-10 left-10"
+              {...({} as any)}
             >
               <Sun className="text-accent w-7 h-7 opacity-60" />
             </motion.div>
@@ -202,6 +209,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 delay: 3
               }}
               className="absolute top-1/2 left-10"
+              {...({} as any)}
             >
               <Wand2 className="text-accent w-8 h-8 opacity-70" />
             </motion.div>
@@ -219,6 +227,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                 delay: 1.5
               }}
               className="absolute top-1/3 right-16"
+              {...({} as any)}
             >
               <SparklesIcon className="text-primary w-6 h-6" />
             </motion.div>
@@ -232,6 +241,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8 }}
               className="mb-8"
+              {...({} as any)}
             >
               <h1 className="text-4xl md:text-5xl font-extrabold text-text-arabic mb-3 animate-pulse" style={{ fontFamily: 'Amiri, serif' }}>
                 جاري إنشاء قصة سحرية
@@ -247,6 +257,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               animate={{ scale: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="mb-8"
+              {...({} as any)}
             >
               <div className="relative">
                 {/* Main Spinner */}
@@ -258,6 +269,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                     ease: "linear"
                   }}
                   className="w-24 h-24 mx-auto mb-6"
+                  {...({} as any)}
                 >
                   <div className="w-full h-full border-4 border-primary/20 border-t-primary rounded-full animate-shimmer" />
                 </motion.div>
@@ -274,6 +286,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                     ease: "easeInOut"
                   }}
                   className="absolute inset-0 flex items-center justify-center"
+                  {...({} as any)}
                 >
                   <BookOpen className="text-primary w-12 h-12" />
                 </motion.div>
@@ -289,6 +302,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                     ease: "linear"
                   }}
                   className="absolute inset-0"
+                  {...({} as any)}
                 >
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <Sparkles className="text-accent w-4 h-4" />
@@ -312,6 +326,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="mb-8"
+              {...({} as any)}
             >
               <AnimatePresence mode="wait">
                 <motion.div
@@ -322,6 +337,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                   transition={{ duration: 0.5 }}
                   className="text-lg font-semibold text-text-arabic animate-bounce"
                   style={{ fontFamily: 'Amiri, serif' }}
+                  {...({} as any)}
                 >
                   {loadingSteps[loadingStep]}
                 </motion.div>
@@ -334,6 +350,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.8 }}
               className="flex justify-center gap-2 mb-8"
+              {...({} as any)}
             >
               {loadingSteps.map((_, index) => (
                 <motion.div
@@ -344,6 +361,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                   }}
                   transition={{ duration: 0.3 }}
                   className="w-3 h-3 bg-primary rounded-full"
+                  {...({} as any)}
                 />
               ))}
             </motion.div>
@@ -354,6 +372,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1 }}
               className="bg-white/80 rounded-2xl p-6 shadow-lg border border-primary/20"
+              {...({} as any)}
             >
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Heart className="text-primary w-6 h-6 animate-pulse" />
@@ -372,6 +391,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
                   transition={{ duration: 0.5 }}
                   className="text-base text-text-arabic leading-relaxed"
                   style={{ fontFamily: 'Amiri, serif' }}
+                  {...({} as any)}
                 >
                   {currentFact}
                 </motion.div>

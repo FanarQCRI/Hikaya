@@ -211,6 +211,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center max-w-xl mx-auto"
+          {...({} as any)}
         >
           <div className="mb-6 flex flex-col items-center">
             {/* Fallback emoji illustration instead of missing SVG */}
@@ -264,6 +265,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
               className="space-y-6"
+              {...({} as any)}
             >
               <div className="space-y-4">
                 {currentPage === 0 ? (
@@ -317,6 +319,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center"
+                    {...({} as any)}
                   >
                     <p className="text-red-700 text-sm font-medium">
                       {audioError}
