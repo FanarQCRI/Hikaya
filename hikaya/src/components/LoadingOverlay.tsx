@@ -59,13 +59,20 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
     setCurrentFact(fallbackFacts[factIndex])
     fetchFact()
 
-    const factInterval = setInterval(() => {
-      setFactIndex(prev => (prev + 1) % fallbackFacts.length)
-      setCurrentFact(fallbackFacts[(factIndex + 1) % fallbackFacts.length])
-    }, 4000)
-
-    return () => clearInterval(factInterval)
-  }, [isVisible, factIndex, theme])
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isVisible) {
+      intervalId = setInterval(() => {
+        setFactIndex(prev => {
+          const next = (prev + 1) % fallbackFacts.length;
+          setCurrentFact(fallbackFacts[next]);
+          return next;
+        });
+      }, 10000); // 10 seconds
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isVisible, theme]);
 
   // Loading step animation
   useEffect(() => {
@@ -73,7 +80,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
 
     const stepInterval = setInterval(() => {
       setLoadingStep(prev => (prev + 1) % loadingSteps.length)
-    }, 2000)
+    }, 3500)
 
     return () => clearInterval(stepInterval)
   }, [isVisible])
