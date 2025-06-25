@@ -379,7 +379,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
             </motion.div>
 
             {/* Encouraging Message */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 1.2 }}
@@ -388,7 +388,7 @@ export default function LoadingOverlay({ isVisible, theme }: LoadingOverlayProps
               <p className="text-sm text-text-english/70 italic animate-wiggle">
                 "Patience is the key to magical stories..."
               </p>
-            </motion.div>
+            </motion.div> */}
           </div>
         </motion.div>
       )}
