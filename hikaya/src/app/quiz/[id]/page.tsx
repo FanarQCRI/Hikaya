@@ -201,13 +201,13 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
                 onClick={handleRetakeQuiz}
                 className="px-6 py-3 bg-primary text-white rounded-full font-bold text-lg shadow hover:bg-primary-light transition"
               >
-                أعد الاختبار (Retake Quiz)
+                أعد الاختبار Retake Quiz
               </button>
               <button
                 onClick={handleReturnToStory}
                 className="px-6 py-3 bg-secondary text-white rounded-full font-bold text-lg shadow hover:bg-secondary/80 transition"
               >
-                العودة للقصة (Return to Story)
+                العودة للقصة Return to Story
               </button>
             </div>
 

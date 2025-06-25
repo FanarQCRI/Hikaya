@@ -108,14 +108,14 @@ const SpeechFeedback: React.FC<SpeechFeedbackProps> = ({ storyText }) => {
   return (
     <div className="bg-white/80 rounded-2xl shadow-lg p-6 mt-8 max-w-xl mx-auto">
       <h2 className="text-2xl font-bold text-text-arabic mb-4 text-center">🎤 أعد سرد القصة بصوتك</h2>
-      <p className="text-text-english/80 mb-4 text-center">Retell the story in your own words! Press record, speak, then get feedback.</p>
+      <p className="text-text-english/80 mb-4 text-center">Retell the story in your own words! Press record, speak, then get feedback</p>
       <div className="flex flex-col items-center gap-4">
         {!recording && (
           <button
             onClick={startRecording}
             className="px-6 py-3 bg-primary text-white rounded-full font-bold text-lg shadow hover:bg-primary-light transition"
           >
-            ▶️ ابدأ التسجيل (Start Recording)
+            ▶️ ابدأ التسجيل Start Recording
           </button>
         )}
         {recording && (
