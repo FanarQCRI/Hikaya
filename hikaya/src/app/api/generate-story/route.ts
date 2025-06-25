@@ -6,33 +6,90 @@ export async function POST(req: NextRequest)
 {
     try
     {
-        const { keywords, level } = await req.json()
+        const { keywords, level, attempt = 1 } = await req.json()
 
         const themes = Array.isArray(keywords) ? keywords.join(', ') : keywords
-        const prompt = `
-Please generate a children's story in Modern Standard Arabic (MSA). Follow these exact instructions:
+        
+        // Use different prompts based on attempt number
+        let prompt: string
+        
+        if (attempt === 1) {
+            // First attempt: comprehensive prompt
+            prompt = `
+أنشئ قصة أطفال عربية جميلة ومتماسكة. اتبع هذه التعليمات بدقة:
 
-The story must be fun, engaging, and suitable for children.
-The theme must center around [${themes}] and should help children learn about Islamic and Arabic heritage or culture.
-The Arabic should be of [${level}] difficulty, understandable for school-aged children.
-The story should be around 2 minutes long when read aloud.
-It must be a proper fictional story, not a lecture or list of facts.
-The story must be divided into 4 short chapters.
+**المتطلبات الأساسية:**
+- القصة يجب أن تكون منطقية ومتماسكة من البداية للنهاية
+- يجب أن يكون لها حبكة واضحة: بداية، مشكلة، حل، نهاية سعيدة
+- الشخصيات يجب أن تكون واضحة ومتطورة
+- الأحداث يجب أن تتبع منطقاً واضحاً
+- اللغة مناسبة لمستوى [${level}]
 
-Output format (follow format strictly, and write in Arabic only - NO SPECIAL CHARACTERS EXCEPT FOR [TITLE], [CHAPTER 1], [CHAPTER 2], [CHAPTER 3], [CHAPTER 4] AND NO FONT STYLING):
+**الموضوع والثقافة:**
+- ركز على [${themes}] كموضوع رئيسي
+- ادمج قيم إسلامية وعربية أصيلة
+- علم الأطفال دروساً مفيدة عن الخير، الصداقة، العائلة، أو المساعدة
+- اجعل القصة ممتعة ومشوقة للأطفال
 
-[Title]: Story Title
+**هيكل القصة (4 فصول):**
+- **الفصل الأول**: مقدمة الشخصيات والمكان، بداية القصة
+- **الفصل الثاني**: ظهور المشكلة أو التحدي
+- **الفصل الثالث**: محاولة حل المشكلة، تطوير الأحداث
+- **الفصل الرابع**: حل المشكلة، النهاية السعيدة، الدرس المستفاد
 
-[Chapter 1]: Chapter Content
+**قواعد مهمة:**
+- اجعل كل فصل يتبع منطقياً من الفصل السابق
+- تأكد من أن الشخصيات تتصرف بطريقة منطقية
+- اربط الأحداث ببعضها البعض
+- لا تترك أحداثاً معلقة أو غير مكتملة
+- اجعل النهاية مرضية ومفيدة
 
-[Chapter 2]: Chapter Content
+**مثال على قصة متماسكة:**
+إذا كان الموضوع "الطبخ":
+- الفصل 1: الطفل يريد مساعدة أمه في الطبخ
+- الفصل 2: يواجه صعوبة في فهم الوصفة
+- الفصل 3: يحاول ويخطئ ثم يتعلم
+- الفصل 4: ينجح في طبخ شيء بسيط ويفرح
 
-[Chapter 3]: Chapter Content
+**التنسيق المطلوب:**
+[العنوان]: عنوان القصة
 
-[Chapter 4]: Chapter Content
+[الفصل الأول]: محتوى الفصل الأول
 
-DO NOT include any extra explanation, notes, or no extra text — only the story in Arabic, exactly in the format
-        `.trim()
+[الفصل الثاني]: محتوى الفصل الثاني
+
+[الفصل الثالث]: محتوى الفصل الثالث
+
+[الفصل الرابع]: محتوى الفصل الرابع
+
+اكتب القصة باللغة العربية فقط، بدون أي تعليقات إضافية أو ملاحظات.
+            `.trim()
+        } else {
+            // Retry attempts: simpler, more direct prompt
+            prompt = `
+أنشئ قصة أطفال بسيطة ومتماسكة عن [${themes}].
+
+**المتطلبات:**
+- قصة منطقية مع بداية ووسط ونهاية
+- شخصية رئيسية واضحة
+- مشكلة بسيطة وحل
+- نهاية سعيدة
+- لغة مناسبة لمستوى [${level}]
+
+**التنسيق:**
+[العنوان]: عنوان القصة
+
+[الفصل الأول]: مقدمة القصة والشخصيات
+
+[الفصل الثاني]: المشكلة أو التحدي
+
+[الفصل الثالث]: محاولة الحل
+
+[الفصل الرابع]: الحل والنهاية السعيدة
+
+اكتب باللغة العربية فقط.
+            `.trim()
+        }
 
         const res = await fetch('https://api.fanar.qa/v1/chat/completions', {
             method: 'POST',
@@ -45,15 +102,14 @@ DO NOT include any extra explanation, notes, or no extra text — only the story
                 messages: [
                     { role: 'user', content: prompt }
                 ],
-                temperature: 0.7,
-                max_tokens: 1000
+                temperature: attempt === 1 ? 0.7 : 0.4, // Lower temperature for retries
+                max_tokens: 1200 // Increased tokens for better stories
             })
         })
 
         const json = await res.json()
-        //console.log('Fanar response:', JSON.stringify(json, null, 2))
         const content = json.choices?.[0]?.message?.content?.trim() ?? ''
-        console.log(content)
+        console.log(`Generated story (attempt ${attempt}):`, content.substring(0, 100) + '...')
         return NextResponse.json({ story: content })
 
     }

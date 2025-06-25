@@ -6,8 +6,12 @@ export class HikayatAPI {
     let attempts = 0;
     let sections: string[] = [];
     let arabicStory = '';
-    const maxAttempts = 20;
+    const maxAttempts = 5; // Increased attempts for better quality
+    
     while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`Attempting story generation (attempt ${attempts}/${maxAttempts})`);
+      
       const response = await fetch('/api/generate-story', {
         method: 'POST',
         headers: {
@@ -16,25 +20,32 @@ export class HikayatAPI {
         body: JSON.stringify({
           keywords: config.theme,
           level: config.difficulty,
+          attempt: attempts
         }),
       })
 
       if (!response.ok) {
-        attempts++;
-        await new Promise(res => setTimeout(res, 500));
+        console.log(`Story generation failed on attempt ${attempts}`);
+        await new Promise(res => setTimeout(res, 1000));
         continue;
       }
 
       const data = await response.json();
       arabicStory = data.story;
       sections = this.parseStorySections(arabicStory);
-      if (sections.length === 5) {
+      
+      // Validate story quality
+      if (this.validateStoryQuality(sections, arabicStory)) {
+        console.log(`Successfully generated quality story on attempt ${attempts}`);
         break;
       }
-      attempts++;
-      await new Promise(res => setTimeout(res, 500));
+      
+      console.log(`Story quality check failed on attempt ${attempts}, retrying...`);
+      await new Promise(res => setTimeout(res, 1000));
     }
+    
     if (sections.length !== 5) {
+      console.warn(`Warning: Could not parse story into 5 sections, using fallback`);
       // As a last resort, just return the whole story as one section
       sections = [arabicStory, '', '', '', ''];
     }
@@ -100,6 +111,49 @@ export class HikayatAPI {
   private static extractTitleFromSections(sections: string[]): string {
     // The first section is always the title
     return sections[0] || 'قصة جديدة'
+  }
+
+  // Validate story quality and coherence
+  private static validateStoryQuality(sections: string[], fullStory: string): boolean {
+    // Check if we have the right number of sections
+    if (sections.length !== 5) {
+      console.log('Story validation failed: Wrong number of sections');
+      return false;
+    }
+    
+    // Check if each section has meaningful content
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i].trim();
+      if (!section || section.length < 20) {
+        console.log(`Story validation failed: Section ${i + 1} too short or empty`);
+        return false;
+      }
+    }
+    
+    // Check for logical story elements
+    const storyText = fullStory.toLowerCase();
+    const hasCharacters = /(طفل|ولد|بنت|أم|أب|عائلة|صديق)/.test(storyText);
+    const hasAction = /(ذهب|جاء|فعل|قال|رأى|سمع)/.test(storyText);
+    const hasProblem = /(مشكلة|صعوبة|تحدي|خوف|قلق)/.test(storyText);
+    const hasSolution = /(حل|نجح|تعلم|ساعد|فرح)/.test(storyText);
+    
+    if (!hasCharacters || !hasAction) {
+      console.log('Story validation failed: Missing basic story elements');
+      return false;
+    }
+    
+    // Check for coherent plot structure
+    const hasBeginning = sections[1] && sections[1].length > 30;
+    const hasMiddle = sections[2] && sections[2].length > 30;
+    const hasEnd = sections[3] && sections[3].length > 30;
+    
+    if (!hasBeginning || !hasMiddle || !hasEnd) {
+      console.log('Story validation failed: Incomplete plot structure');
+      return false;
+    }
+    
+    console.log('Story validation passed: Quality story generated');
+    return true;
   }
 
   // Generate quiz questions from story
