@@ -14,6 +14,27 @@ import { generateAudioFromText, playAudio, stopAudio } from '@/lib/audio'
 import React from 'react'
 import { cleanChapterText } from '@/lib/utils'
 
+// Add animated equalizer SVG for loading
+function EqualizerIcon() {
+  return (
+    <span className="flex items-end gap-0.5 h-5">
+      <span className="block w-1 h-2 bg-blue-400 animate-eq1 rounded-sm" />
+      <span className="block w-1 h-4 bg-blue-500 animate-eq2 rounded-sm" />
+      <span className="block w-1 h-3 bg-blue-400 animate-eq3 rounded-sm" />
+    </span>
+  );
+}
+
+// Move the global style block for equalizer animation to the top level
+<style jsx global>{`
+@keyframes eq1 { 0%,100%{height:8px} 50%{height:20px} }
+@keyframes eq2 { 0%,100%{height:20px} 50%{height:8px} }
+@keyframes eq3 { 0%,100%{height:14px} 50%{height:20px} }
+.animate-eq1 { animation: eq1 1s infinite; }
+.animate-eq2 { animation: eq2 1s infinite; }
+.animate-eq3 { animation: eq3 1s infinite; }
+`}</style>
+
 export default function StoryPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id } = React.use(params)
@@ -236,83 +257,83 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
         <div className="relative flex flex-col md:flex-row-reverse items-stretch bg-[#fdf6e3] rounded-[2.5rem] shadow-2xl border border-warm overflow-hidden min-h-[500px]">
           {/* Right page (text) */}
           <div className="flex-1 flex flex-col justify-center items-center px-10 py-14 md:py-20 md:pr-20 md:pl-14">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-                {...({} as any)}
-              >
-                <div className="space-y-4">
-                  {currentPage === 0 ? (
-                    <div className="arabic-text text-4xl md:text-5xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center font-bold" style={{ fontWeight: 800, letterSpacing: '-0.01em', maxWidth: '100%', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                      {cleanChapterText(currentPageData.arabicText)}
-                    </div>
-                  ) : (
-                    <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic font-[Noto Sans Arabic,sans-serif] text-center" style={{ fontWeight: 600, letterSpacing: '-0.01em', maxWidth: '95%', wordBreak: 'break-word', overflowWrap: 'break-word', color: '#7c4a03' }}>
-                      {cleanChapterText(currentPageData.arabicText)}
-                    </div>
-                  )}
-                  {/* Real Translate and Listen buttons */}
-                  <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-14">
-                    <button
-                      onClick={() => setShowTranslation(v => !v)}
-                      className="px-6 py-2 rounded-full bg-blue-200 text-blue-900 font-bold shadow hover:bg-blue-300 transition-all text-lg flex items-center gap-2"
-                    >
-                      <Globe className="w-5 h-5" />
-                      {showTranslation ? 'إخفاء الترجمة' : 'ترجمة إلى الإنجليزية'}
-                    </button>
-                    <button
-                      onClick={() => handlePlayAudio(currentPageData)}
-                      disabled={isPlaying || isGeneratingAudio}
-                      className={cn(
-                        "px-6 py-2 rounded-full font-bold shadow transition-all text-lg flex items-center gap-2",
-                        isPlaying || isGeneratingAudio
-                          ? "bg-orange-500 text-white cursor-not-allowed"
-                          : "bg-orange-400 text-white hover:bg-orange-500"
-                      )}
-                    >
-                      <Volume2 className={cn(
-                        isPlaying && "animate-pulse",
-                        isGeneratingAudio && "animate-spin"
-                      )} />
-                      {isGeneratingAudio 
-                        ? 'جاري إنشاء الصوت...' 
-                        : isPlaying 
-                        ? 'يتم التشغيل...' 
-                        : 'استمع للنص'
-                      }
-                    </button>
+            <div className="space-y-6"><motion.div
+              key={currentPage}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div className="space-y-4">
+                {currentPage === 0 ? (
+                  <div className="arabic-text text-4xl md:text-5xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center font-bold" style={{ fontWeight: 800, letterSpacing: '-0.01em', maxWidth: '100%', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                    {cleanChapterText(currentPageData.arabicText)}
                   </div>
-                  
-                  {/* Audio Error Message */}
-                  {audioError && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center"
-                    >
-                      <p className="text-red-700 text-sm font-medium">
-                        {audioError}
-                      </p>
-                    </motion.div>
-                  )}
-                  
-                  {/* Mock English translation */}
-                  {showTranslation && (
-                    <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>
-                      {currentPageData.englishText
-                        ? currentPageData.englishText
-                        : 'Translating...'}
-                    </div>
-                  )}
+                ) : (
+                  <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic font-[Noto Sans Arabic,sans-serif] text-center" style={{ fontWeight: 600, letterSpacing: '-0.01em', maxWidth: '95%', wordBreak: 'break-word', overflowWrap: 'break-word', color: '#7c4a03' }}>
+                    {cleanChapterText(currentPageData.arabicText)}
+                  </div>
+                )}
+                {/* Real Translate and Listen buttons */}
+                <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-14">
+                  <button
+                    onClick={() => setShowTranslation(v => !v)}
+                    className="px-6 py-2 rounded-full bg-blue-200 text-blue-900 font-bold shadow hover:bg-blue-300 transition-all text-lg flex items-center gap-2"
+                  >
+                    <Globe className="w-5 h-5" />
+                    {showTranslation ? 'إخفاء الترجمة' : 'ترجمة إلى الإنجليزية'}
+                  </button>
+                  <button
+                    onClick={() => handlePlayAudio(currentPageData)}
+                    disabled={isPlaying || isGeneratingAudio}
+                    className={cn(
+                      "px-6 py-2 rounded-full font-bold shadow transition-all text-lg flex items-center gap-2",
+                      isGeneratingAudio
+                        ? "bg-blue-400 text-white cursor-not-allowed"
+                        : isPlaying
+                        ? "bg-green-500 text-white animate-pulse"
+                        : "bg-orange-400 text-white hover:bg-orange-500"
+                    )}
+                  >
+                    {isGeneratingAudio ? (
+                      <EqualizerIcon />
+                    ) : (
+                      <Volume2 className={cn(isPlaying && "animate-pulse")}/>
+                    )}
+                    {isGeneratingAudio
+                      ? 'جاري إنشاء الصوت...'
+                      : isPlaying
+                      ? 'يتم التشغيل...'
+                      : 'استمع للنص'
+                    }
+                  </button>
                 </div>
-              </motion.div>
-            </AnimatePresence>
+                
+                {/* Audio Error Message */}
+                {audioError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center"
+                  >
+                    <p className="text-red-700 text-sm font-medium">
+                      {audioError}
+                    </p>
+                  </motion.div>
+                )}
+                
+                {/* Mock English translation */}
+                {showTranslation && (
+                  <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>
+                    {currentPageData.englishText
+                      ? currentPageData.englishText
+                      : 'Translating...'}
+                  </div>
+                )}
+              </div>
+            </motion.div></div>
           </div>
           {/* Center spine */}
           <div className="hidden md:block w-3 relative z-20">
