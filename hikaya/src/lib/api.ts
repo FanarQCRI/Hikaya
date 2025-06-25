@@ -117,24 +117,30 @@ export class HikayatAPI {
     // 1. السؤال\nأ. ...\nب. ...\nج. ...\nد. ...\nالإجابة الصحيحة: أ\n
     const questions: any[] = []
     const raw = data.questions || ''
+    console.log('LLM MCQ raw output:', raw)
     const questionBlocks = raw.split(/\n(?=\d+\.)/).map(q => q.trim()).filter(Boolean)
     for (const block of questionBlocks) {
       const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
       if (lines.length < 6) continue
       let arabicText = lines[0].replace(/^\d+\.\s*/, '')
-      const options = lines.slice(1, 5).map(opt => opt.replace(/^[أ-د]\.\s*/, ''))
+      const options = lines.slice(1, 5).map(opt => opt.replace(/^[أ-دA-D]\.\s*/, ''))
       // Skip if question is just 'السؤال' or empty, or if any option looks like a question
       if (arabicText === 'السؤال' || !arabicText || options.some(opt => opt.includes('السؤال'))) continue
       const correctLine = lines.find(l => l.startsWith('الإجابة الصحيحة')) || ''
-      const correctLetter = correctLine.match(/[أ-د]/)?.[0] || 'أ'
-      const correctAnswer = { 'أ': 0, 'ب': 1, 'ج': 2, 'د': 3 }[correctLetter] ?? 0
+      // Accept both Arabic and English answer letters, even if followed by a dot or text
+      const correctLetterMatch = correctLine.match(/[:：]\s*([أ-دA-D])/)
+      if (!correctLetterMatch) continue // skip if not found
+      const correctLetter = correctLetterMatch[1]
+      const letterMap: Record<string, number> = { 'أ': 0, 'A': 0, 'ب': 1, 'B': 1, 'ج': 2, 'C': 2, 'د': 3, 'D': 3 }
+      if (!(correctLetter in letterMap)) continue
+      const correctAnswer = letterMap[correctLetter]
       questions.push({
         id: `${storyId}-q${questions.length + 1}`,
         arabicText,
         englishText: '',
         options,
         correctAnswer,
-        points: 2
+        points: 1
       })
     }
     return questions
