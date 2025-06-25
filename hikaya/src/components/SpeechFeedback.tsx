@@ -7,7 +7,7 @@ interface SpeechFeedbackProps {
 const SpeechFeedback: React.FC<SpeechFeedbackProps> = ({ storyText }) => {
   const [recording, setRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ rating: number; comment: string } | null>(null)
   const [feedbackAudio, setFeedbackAudio] = useState<string | null>(null)
   const [transcript, setTranscript] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -71,12 +71,38 @@ const SpeechFeedback: React.FC<SpeechFeedbackProps> = ({ storyText }) => {
       }
       const data = await res.json()
       setTranscript(data.transcript)
-      setFeedback(data.feedbackText)
+      
+      // Parse the feedback to extract rating and comment
+      const feedbackText = data.feedbackText || ''
+      const ratingMatch = feedbackText.match(/التقييم:\s*(\d+)\s*⭐+/)
+      const commentMatch = feedbackText.match(/التعليق:\s*(.+)/)
+      
+      const rating = ratingMatch ? parseInt(ratingMatch[1]) : 0
+      const comment = commentMatch ? commentMatch[1].trim() : feedbackText
+      
+      setFeedback({ rating, comment })
       setFeedbackAudio(data.feedbackAudio)
     } catch (err) {
       setError('An error occurred. Please try again.')
     }
     setLoading(false)
+  }
+
+  const renderStars = (rating: number) => {
+    return '⭐'.repeat(rating) + '☆'.repeat(5 - rating)
+  }
+
+  const getRatingColor = (rating: number) => {
+    if (rating >= 4) return 'text-green-600'
+    if (rating >= 3) return 'text-yellow-600'
+    return 'text-red-600'
+  }
+
+  const getRatingMessage = (rating: number) => {
+    if (rating >= 4) return 'ممتاز! (Excellent!)'
+    if (rating >= 3) return 'جيد! (Good!)'
+    if (rating >= 2) return 'مقبول (Fair)'
+    return 'يحتاج تحسين (Needs Improvement)'
   }
 
   return (
@@ -115,14 +141,37 @@ const SpeechFeedback: React.FC<SpeechFeedbackProps> = ({ storyText }) => {
         {error && <div className="text-red-600 font-bold mt-2">{error}</div>}
         {feedback && (
           <div className="mt-6 w-full">
-            <h3 className="text-xl font-bold text-text-arabic mb-2">تعليق الذكاء الاصطناعي:</h3>
-            <p className="text-lg text-text-arabic mb-2">{feedback}</p>
+            <h3 className="text-xl font-bold text-text-arabic mb-4 text-center">تقييم الذكاء الاصطناعي</h3>
+            
+            {/* Rating Display */}
+            <div className="bg-gradient-to-r from-warm-light to-accent-light rounded-xl p-4 mb-4 text-center">
+              <div className="text-3xl mb-2">
+                <span className={getRatingColor(feedback.rating)}>{renderStars(feedback.rating)}</span>
+              </div>
+              <div className={`text-lg font-bold ${getRatingColor(feedback.rating)}`}>
+                {getRatingMessage(feedback.rating)}
+              </div>
+            </div>
+            
+            {/* Feedback Comment */}
+            <div className="bg-white/60 rounded-xl p-4 mb-4">
+              <h4 className="text-lg font-bold text-text-arabic mb-2">التعليق:</h4>
+              <p className="text-text-arabic leading-relaxed">{feedback.comment}</p>
+            </div>
+            
+            {/* Audio Feedback */}
             {feedbackAudio && (
-              <audio controls src={feedbackAudio} className="my-2" />
+              <div className="bg-accent-light/30 rounded-xl p-4">
+                <h4 className="text-lg font-bold text-text-arabic mb-2">التعليق الصوتي:</h4>
+                <audio controls src={feedbackAudio} className="w-full" />
+              </div>
             )}
+            
+            {/* Transcript */}
             {transcript && (
-              <div className="mt-2 text-sm text-text-english/70">
-                <strong>Transcript:</strong> {transcript}
+              <div className="mt-4 bg-gray-50 rounded-xl p-4">
+                <h4 className="text-lg font-bold text-text-arabic mb-2">ما قلته:</h4>
+                <p className="text-text-english/70 italic">"{transcript}"</p>
               </div>
             )}
           </div>
