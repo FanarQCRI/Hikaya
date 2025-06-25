@@ -9,6 +9,7 @@ import type { Story, Question } from '@/types'
 import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import React from 'react'
+import SpeechFeedback from '@/components/SpeechFeedback'
 
 export default function QuizPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -198,26 +199,22 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleRetakeQuiz}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
+                className="px-6 py-3 bg-primary text-white rounded-full font-bold text-lg shadow hover:bg-primary-light transition"
               >
-                إعادة الاختبار
-                <Star className="w-5 h-5" />
+                أعد الاختبار (Retake Quiz)
               </button>
               <button
                 onClick={handleReturnToStory}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-warm-light/50 text-text-arabic rounded-full hover:bg-warm-light transition-all duration-300"
+                className="px-6 py-3 bg-secondary text-white rounded-full font-bold text-lg shadow hover:bg-secondary/80 transition"
               >
-                العودة إلى القصة
-                <ArrowLeft className="w-5 h-5" />
+                العودة للقصة (Return to Story)
               </button>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-warm-light/50 text-text-arabic rounded-full hover:bg-warm-light transition-all duration-300"
-              >
-                العودة للصفحة الرئيسية
-                <ArrowRight className="w-5 h-5" />
-              </Link>
             </div>
+
+            {/* Speech Feedback Integration */}
+            {story && (
+              <SpeechFeedback storyText={story.pages.map((p: any) => p.arabicText).join('\n')} />
+            )}
           </motion.div>
         </div>
       </div>
