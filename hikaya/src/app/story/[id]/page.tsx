@@ -31,6 +31,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [isLoading, setIsLoading] = useState(true)
   const [showTranslation, setShowTranslation] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showCompletion, setShowCompletion] = useState(false)
 
   useEffect(() => {
     // Load story from IndexedDB
@@ -77,6 +78,13 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
 
   const handleFinishStory = () => {
     if (story) {
+      // Save only minimal story data for quiz
+      const minimalStory = {
+        id: story.id,
+        title: story.title,
+        pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+      }
+      localStorage.setItem('currentStory', JSON.stringify(minimalStory))
       router.push(`/quiz/${story.id}`)
     }
   }
@@ -112,6 +120,34 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const currentPageData = story.pages[currentPage]
   const isFirstPage = currentPage === 0
   const isLastPage = currentPage === story.pages.length - 1
+
+  // Show completion screen if last page and showCompletion is true
+  if (showCompletion && story) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center max-w-xl mx-auto"
+        >
+          <div className="mb-6 flex flex-col items-center">
+            {/* Fallback emoji illustration instead of missing SVG */}
+            <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
+            <h1 className="text-3xl font-extrabold text-text-arabic mb-2">أحسنت! أنهيت القصة 🎉</h1>
+            <p className="text-lg text-text-english/80 mb-4">Great job! You finished the story. Are you ready for a fun quiz?</p>
+          </div>
+          <button
+            onClick={handleFinishStory}
+            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-primary to-primary-light text-white text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
+          >
+            ابدأ الاختبار
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="mt-4 text-text-arabic text-base">اختبر معلوماتك حول القصة واكسب النقاط!</div>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm">
@@ -247,8 +283,8 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
             {/* Next/Finish Button */}
             {isLastPage ? (
               <button
-                onClick={handleFinishStory}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
+                onClick={() => setShowCompletion(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300 text-xl font-bold"
               >
                 انتهت القصة
                 <ArrowLeft className="w-5 h-5" />

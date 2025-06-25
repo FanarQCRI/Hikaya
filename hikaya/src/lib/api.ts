@@ -100,6 +100,45 @@ export class HikayatAPI {
     // The first section is always the title
     return sections[0] || 'قصة جديدة'
   }
+
+  // Generate quiz questions from story
+  static async generateQuiz(storyId: string, storyContent: string[]): Promise<any[]> {
+    // Join all story content into one string
+    const storyText = storyContent.join('\n')
+    const response = await fetch('/api/generate-mcqs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ story: storyText })
+    })
+    if (!response.ok) return []
+    const data = await response.json()
+    // The API returns a string of questions, need to parse into objects
+    // Example format:
+    // 1. السؤال\nأ. ...\nب. ...\nج. ...\nد. ...\nالإجابة الصحيحة: أ\n
+    const questions: any[] = []
+    const raw = data.questions || ''
+    const questionBlocks = raw.split(/\n(?=\d+\.)/).map(q => q.trim()).filter(Boolean)
+    for (const block of questionBlocks) {
+      const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
+      if (lines.length < 6) continue
+      let arabicText = lines[0].replace(/^\d+\.\s*/, '')
+      const options = lines.slice(1, 5).map(opt => opt.replace(/^[أ-د]\.\s*/, ''))
+      // Skip if question is just 'السؤال' or empty, or if any option looks like a question
+      if (arabicText === 'السؤال' || !arabicText || options.some(opt => opt.includes('السؤال'))) continue
+      const correctLine = lines.find(l => l.startsWith('الإجابة الصحيحة')) || ''
+      const correctLetter = correctLine.match(/[أ-د]/)?.[0] || 'أ'
+      const correctAnswer = { 'أ': 0, 'ب': 1, 'ج': 2, 'د': 3 }[correctLetter] ?? 0
+      questions.push({
+        id: `${storyId}-q${questions.length + 1}`,
+        arabicText,
+        englishText: '',
+        options,
+        correctAnswer,
+        points: 2
+      })
+    }
+    return questions
+  }
 }
 
 // Utility to clean section markers and special characters from story text
