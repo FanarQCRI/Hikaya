@@ -61,7 +61,7 @@ All services are bilingual and continually updated:
 
 - [Fanar Chat](https://chat.fanar.qa/)
 - [Fanar API access](https://fanar.qa/)  
-  API Key: `x`
+  API Key: `Found in .env.local`
 
 - Hugging Face Models:  
   - [Fanar-1-9B](https://huggingface.co/QCRI/Fanar-1-9B)  

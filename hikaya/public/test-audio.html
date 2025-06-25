@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fanar TTS Audio Test</h1>
+        
+        <div>
+            <label for="textInput">Arabic Text:</label><br>
+            <textarea id="textInput" rows="4" cols="50" placeholder="Enter Arabic text here...">مرحبا بكم في قصة جميلة للأطفال</textarea>
+        </div>
+        
+        <div>
+            <button id="testBtn" onclick="testAudio()">Test Audio Generation</button>
+            <button id="playBtn" onclick="playAudio()" disabled>Play Audio</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+    </div>
+
+    <script>
+        let currentAudioUrl = null;
+
+        async function testAudio() {
+            const textInput = document.getElementById('textInput');
+            const testBtn = document.getElementById('testBtn');
+            const playBtn = document.getElementById('playBtn');
+            const status = document.getElementById('status');
+            const audioPlayer = document.getElementById('audioPlayer');
+
+            const text = textInput.value.trim();
+            if (!text) {
+                showStatus('Please enter some text', 'error');
+                return;
+            }
+
+            testBtn.disabled = true;
+            showStatus('Generating audio...', 'loading');
+
+            try {
+                const response = await fetch('/api/story-to-speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ story: text }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`HTTP ${response.status}: ${errorData.error || 'Unknown error'}`);
+                }
+
+                const audioBlob = await response.blob();
+                
+                if (audioBlob.size === 0) {
+                    throw new Error('Generated audio is empty');
+                }
+
+                // Create audio URL
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                }
+                currentAudioUrl = URL.createObjectURL(audioBlob);
+                
+                // Set up audio player
+                audioPlayer.src = currentAudioUrl;
+                audioPlayer.style.display = 'block';
+                
+                showStatus(`Audio generated successfully! Size: ${audioBlob.size} bytes`, 'success');
+                playBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Audio generation error:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                testBtn.disabled = false;
+            }
+        }
+
+        function playAudio() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            if (audioPlayer.src) {
+                audioPlayer.play().catch(error => {
+                    console.error('Playback error:', error);
+                    showStatus(`Playback error: ${error.message}`, 'error');
+                });
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+        });
+    </script>
+</body>
+</html> 

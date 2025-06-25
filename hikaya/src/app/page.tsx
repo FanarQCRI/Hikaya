@@ -39,6 +39,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center max-w-4xl mx-auto"
+          {...({} as any)}
         >
           {/* Logo and Title */}
           <motion.div

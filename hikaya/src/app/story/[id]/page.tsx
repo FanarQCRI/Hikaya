@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Volume2, Globe, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -10,6 +10,7 @@ import type { Story, StoryPage } from '@/types'
 import { HikayatAPI, fetchStoryTranslationsInBackground } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { getStoryFromIndexedDB } from '@/lib/utils'
+import { generateAudioFromText, playAudio, stopAudio } from '@/lib/audio'
 import React from 'react'
 
 // Utility to clean section markers and special characters from story text
@@ -32,6 +33,10 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [showTranslation, setShowTranslation] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [showCompletion, setShowCompletion] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false)
+  const [audioError, setAudioError] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     // Load story from IndexedDB
@@ -49,8 +54,32 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
     })
   }, [id])
 
+  // Cleanup audio when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        stopAudio(audioRef.current)
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+      }
+    }
+  }, [audioUrl])
+
   const handleNextPage = () => {
     if (story && currentPage < story.pages.length - 1) {
+      // Stop any playing audio when changing pages
+      if (audioRef.current) {
+        stopAudio(audioRef.current)
+        audioRef.current = null
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+        setAudioUrl(null)
+      }
+      setIsPlaying(false)
+      setIsGeneratingAudio(false)
+      
       setCurrentPage(prev => prev + 1)
       setShowEnglish(false)
     }
@@ -58,22 +87,62 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
+      // Stop any playing audio when changing pages
+      if (audioRef.current) {
+        stopAudio(audioRef.current)
+        audioRef.current = null
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+        setAudioUrl(null)
+      }
+      setIsPlaying(false)
+      setIsGeneratingAudio(false)
+      
       setCurrentPage(prev => prev - 1)
       setShowEnglish(false)
     }
   }
 
   const handlePlayAudio = async (page: StoryPage) => {
-    if (!page.audioUrl) {
-      // Mock audio play - in real app, you'd use the actual audio URL
-      setIsPlayingAudio(true)
-      setTimeout(() => setIsPlayingAudio(false), 3000)
-      return
-    }
+    try {
+      // Clear any previous errors
+      setAudioError(null)
+      
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        stopAudio(audioRef.current)
+        audioRef.current = null
+      }
 
-    setIsPlayingAudio(true)
-    // Here you would play the actual audio
-    setTimeout(() => setIsPlayingAudio(false), 3000)
+      setIsPlaying(true)
+      setIsGeneratingAudio(true)
+
+      // Generate audio for the current page text
+      const cleanText = cleanSectionText(page.arabicText)
+      const generatedAudioUrl = await generateAudioFromText(cleanText)
+      
+      setAudioUrl(generatedAudioUrl)
+      setIsGeneratingAudio(false)
+
+      // Play the audio
+      await playAudio(generatedAudioUrl)
+      
+      setIsPlaying(false)
+      setAudioUrl(null)
+    } catch (error) {
+      console.error('Error playing audio:', error)
+      setIsPlaying(false)
+      setIsGeneratingAudio(false)
+      setAudioUrl(null)
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ في تشغيل الصوت'
+      setAudioError(errorMessage)
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setAudioError(null), 5000)
+    }
   }
 
   const handleFinishStory = () => {
@@ -195,7 +264,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                       {cleanSectionText(currentPageData.arabicText)}
                     </div>
                   )}
-                  {/* Mock Translate and Listen buttons */}
+                  {/* Real Translate and Listen buttons */}
                   <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-14">
                     <button
                       onClick={() => setShowTranslation(v => !v)}
@@ -205,16 +274,42 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                       {showTranslation ? 'إخفاء الترجمة' : 'ترجمة إلى الإنجليزية'}
                     </button>
                     <button
-                      onClick={() => {
-                        setIsPlaying(true);
-                        setTimeout(() => setIsPlaying(false), 2000);
-                      }}
-                      className="px-6 py-2 rounded-full bg-orange-400 text-white font-bold shadow hover:bg-orange-500 transition-all text-lg flex items-center gap-2"
+                      onClick={() => handlePlayAudio(currentPageData)}
+                      disabled={isPlaying || isGeneratingAudio}
+                      className={cn(
+                        "px-6 py-2 rounded-full font-bold shadow transition-all text-lg flex items-center gap-2",
+                        isPlaying || isGeneratingAudio
+                          ? "bg-orange-500 text-white cursor-not-allowed"
+                          : "bg-orange-400 text-white hover:bg-orange-500"
+                      )}
                     >
-                      <Volume2 className={isPlaying ? 'animate-pulse' : ''} />
-                      {isPlaying ? 'يتم التشغيل...' : 'استمع للنص'}
+                      <Volume2 className={cn(
+                        isPlaying && "animate-pulse",
+                        isGeneratingAudio && "animate-spin"
+                      )} />
+                      {isGeneratingAudio 
+                        ? 'جاري إنشاء الصوت...' 
+                        : isPlaying 
+                        ? 'يتم التشغيل...' 
+                        : 'استمع للنص'
+                      }
                     </button>
                   </div>
+                  
+                  {/* Audio Error Message */}
+                  {audioError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center"
+                    >
+                      <p className="text-red-700 text-sm font-medium">
+                        {audioError}
+                      </p>
+                    </motion.div>
+                  )}
+                  
                   {/* Mock English translation */}
                   {showTranslation && (
                     <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>

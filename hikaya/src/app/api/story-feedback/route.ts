@@ -108,7 +108,7 @@ ${transcript}
             body: JSON.stringify({
                 model: 'Fanar-Aura-TTS-1',
                 input: feedbackText,
-                voice: 'arb-female-01',
+                voice: 'default',
                 format: 'mp3'
             })
         })
