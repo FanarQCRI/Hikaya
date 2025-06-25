@@ -90,22 +90,41 @@ export class HikayatAPI {
 
   // Robustly parse story into 5 sections: [title, chapter1, chapter2, chapter3, chapter4]
   private static parseStorySections(story: string): string[] {
+    // First, clean the story of instruction headers
+    const cleanedStory = story
+      // Remove instruction headers that might appear in the content
+      .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+      .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+      .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو).*$/gim, '')
+    
     // Accepts both Arabic and English markers, e.g. [العنوان]:, [الفصل 1]:, [Title]:, [Chapter 1]:
     const sectionRegex = /\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g
-    const matches = [...story.matchAll(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)]
+    const matches = [...cleanedStory.matchAll(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)]
+    
     if (matches.length !== 5) {
       // fallback: try to split by lines with colon and bracket
-      const fallbackSections = story.split(/\n(?=\[.*?:\])/).map(s => s.trim()).filter(Boolean)
+      const fallbackSections = cleanedStory.split(/\n(?=\[.*?:\])/).map(s => s.trim()).filter(Boolean)
       if (fallbackSections.length === 5) return fallbackSections
       // fallback: try to split by double newlines
-      const doubleNewlineSections = story.split(/\n\n+/).map(s => s.trim()).filter(Boolean)
+      const doubleNewlineSections = cleanedStory.split(/\n\n+/).map(s => s.trim()).filter(Boolean)
       if (doubleNewlineSections.length === 5) return doubleNewlineSections
       return []
     }
+    
     // Split by the section markers
-    const parts = story.split(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)
+    const parts = cleanedStory.split(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)
       .map(s => s.trim()).filter(Boolean)
-    return parts.length === 5 ? parts : []
+    
+    // Clean each section of any remaining instruction text
+    const cleanedParts = parts.map(part => 
+      part
+        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+        .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+        .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو).*$/gim, '')
+        .trim()
+    )
+    
+    return cleanedParts.length === 5 ? cleanedParts : []
   }
 
   private static extractTitleFromSections(sections: string[]): string {

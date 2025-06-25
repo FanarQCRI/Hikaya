@@ -76,6 +76,12 @@ export function cleanChapterText(text: string): string {
     .replace(/^(الفصل|العنوان|chapter|title|section)\s*\d*.*$/gim, '')
     // Remove explicit markers in-line (Title, Chapter 1, etc.)
     .replace(/(Title|العنوان|Chapter ?\d*|الفصل ?\d*)/gi, '')
+    // Remove instruction headers like "الأول: مقدمة القصة والشخصيات"
+    .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+    // Remove instruction headers like "الفصل الأول: مقدمة القصة والشخصيات"
+    .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
+    // Remove any line that starts with ordinal numbers followed by instruction text
+    .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو).*$/gim, '')
     // Remove separators like --- or ——
     .replace(/[-–—*]+/g, '')
     // Remove all English-only words
