@@ -90,12 +90,35 @@ export class HikayatAPI {
 
   // Robustly parse story into 5 sections: [title, chapter1, chapter2, chapter3, chapter4]
   private static parseStorySections(story: string): string[] {
-    // First, clean the story of instruction headers
+    // First, clean the story of instruction headers using comprehensive patterns
     const cleanedStory = story
-      // Remove instruction headers that might appear in the content
-      .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
-      .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
-      .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو).*$/gim, '')
+      // Remove instruction headers that might appear in the content (at start of lines)
+      .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+      .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+      .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+      .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*$/gim, '')
+      // Remove ordinal numbers and instruction text anywhere in the text (not just at start)
+      .replace(/(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
+      .replace(/(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
+      // Remove standalone ordinal numbers that might appear in text (including typos)
+      .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
+      // Remove instruction text that might appear anywhere
+      .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
+      // Remove any line that starts with "لأول:" or similar patterns
+      .replace(/^لأول\s*:.*$/gim, '')
+      .replace(/^لثاني\s*:.*$/gim, '')
+      .replace(/^لثالث\s*:.*$/gim, '')
+      .replace(/^لرابع\s*:.*$/gim, '')
+      .replace(/^لخامس\s*:.*$/gim, '')
+      // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
+      .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
+      .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
+      // Remove ordinal numbers that appear at the start of any sentence (after periods, exclamation, question marks)
+      .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '$1 ')
+      .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '$1 ')
+      // Remove ordinal numbers that appear anywhere in the text (more aggressive)
+      .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, ' ')
+      .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, ' ')
     
     // Accepts both Arabic and English markers, e.g. [العنوان]:, [الفصل 1]:, [Title]:, [Chapter 1]:
     const sectionRegex = /\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g
@@ -115,12 +138,36 @@ export class HikayatAPI {
     const parts = cleanedStory.split(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)
       .map(s => s.trim()).filter(Boolean)
     
-    // Clean each section of any remaining instruction text
+    // Clean each section of any remaining instruction text using comprehensive patterns
     const cleanedParts = parts.map(part => 
       part
-        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
-        .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل).*$/gim, '')
-        .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو).*$/gim, '')
+        // Remove instruction headers that might appear in the content (at start of lines)
+        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+        .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+        .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
+        .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*$/gim, '')
+        // Remove ordinal numbers and instruction text anywhere in the text (not just at start)
+        .replace(/(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
+        .replace(/(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
+        // Remove standalone ordinal numbers that might appear in text (including typos)
+        .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
+        // Remove instruction text that might appear anywhere
+        .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
+        // Remove any line that starts with "لأول:" or similar patterns
+        .replace(/^لأول\s*:.*$/gim, '')
+        .replace(/^لثاني\s*:.*$/gim, '')
+        .replace(/^لثالث\s*:.*$/gim, '')
+        .replace(/^لرابع\s*:.*$/gim, '')
+        .replace(/^لخامس\s*:.*$/gim, '')
+        // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
+        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
+        .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
+        // Remove ordinal numbers that appear at the start of any sentence (after periods, exclamation, question marks)
+        .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '$1 ')
+        .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '$1 ')
+        // Remove ordinal numbers that appear anywhere in the text (more aggressive)
+        .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, ' ')
+        .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, ' ')
         .trim()
     )
     
