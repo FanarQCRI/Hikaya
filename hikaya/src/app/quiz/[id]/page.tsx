@@ -36,9 +36,8 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         }
       } catch (error) {
         console.error('Error loading quiz:', error)
-      } finally {
-        setIsLoading(false)
       }
+      setIsLoading(false)
     }
 
     loadQuiz()
@@ -87,7 +86,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     )
   }
 
-  if (!story || questions.length === 0) {
+  if (!isLoading && (!story || questions.length === 0)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm flex items-center justify-center">
         <div className="text-center">
