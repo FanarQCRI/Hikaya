@@ -282,7 +282,7 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
             {currentQuestion.options.map((option, index) => {
               const isSelected = selectedAnswer === index
               const isCorrect = isAnswered && index === currentQuestion.correctAnswer
-              const isWrong = isAnswered && isSelected && !isCorrect
+              const isWrong = isAnswered && isSelected && index !== currentQuestion.correctAnswer
 
               return (
                 <button

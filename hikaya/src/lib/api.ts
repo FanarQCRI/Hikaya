@@ -255,7 +255,7 @@ export class HikayatAPI {
       console.log('LLM MCQ raw output:', raw)
       
       // Parse questions with validation
-      const newQuestions = this.parseMCQQuestions(raw, storyId)
+      const newQuestions = this.parseMCQQuestions(raw, storyId, storyText)
       
       // Add new questions to existing ones, avoiding duplicates
       for (const newQuestion of newQuestions) {
@@ -284,8 +284,41 @@ export class HikayatAPI {
     return questions
   }
   
+  // Verify that the correct answer exists in the story text
+  private static verifyAnswerInStory(correctAnswer: string, storyText: string): boolean {
+    // Clean the correct answer and story text for comparison
+    const cleanAnswer = correctAnswer.replace(/[^\u0600-\u06FF\s]/g, '').trim().toLowerCase()
+    const cleanStory = storyText.replace(/[^\u0600-\u06FF\s]/g, '').trim().toLowerCase()
+    
+    // Check if the answer exists as a complete phrase
+    if (cleanStory.includes(cleanAnswer)) {
+      return true
+    }
+    
+    // Check if the answer exists as individual words (for longer answers)
+    const answerWords = cleanAnswer.split(/\s+/).filter(word => word.length > 2)
+    const storyWords = cleanStory.split(/\s+/)
+    
+    // If answer has multiple words, check if most words exist in story
+    if (answerWords.length > 1) {
+      const matchingWords = answerWords.filter(word => 
+        storyWords.some(storyWord => storyWord.includes(word) || word.includes(storyWord))
+      )
+      return matchingWords.length >= Math.ceil(answerWords.length * 0.7) // 70% of words should match
+    }
+    
+    // For single words, check if the word exists in story
+    if (answerWords.length === 1) {
+      return storyWords.some(storyWord => 
+        storyWord.includes(answerWords[0]) || answerWords[0].includes(storyWord)
+      )
+    }
+    
+    return false
+  }
+  
   // Parse MCQ questions with validation
-  private static parseMCQQuestions(raw: string, storyId: string): any[] {
+  private static parseMCQQuestions(raw: string, storyId: string, storyText: string): any[] {
     const questions: any[] = []
     
     // Split into question blocks
@@ -317,9 +350,22 @@ export class HikayatAPI {
         }
         
         // Check if question is too generic
-        const genericQuestions = ['ما هي القصة؟', 'ماذا حدث؟', 'من هو؟', 'أين؟', 'متى؟']
+        const genericQuestions = ['ما هي القصة؟', 'ماذا حدث؟', 'من هو؟', 'أين؟', 'متى؟', 'كيف؟', 'لماذا؟']
         if (genericQuestions.some(gq => arabicText.includes(gq))) {
           console.log('Skipping generic question:', arabicText)
+          continue
+        }
+        
+        // Check if question asks about information not likely to be in the story
+        const problematicPatterns = [
+          /كم عمر/, /كم سنة/, /أي يوم/, /أي شهر/, /أي سنة/, /أي تاريخ/,
+          /كم ساعة/, /كم دقيقة/, /كم ثانية/,
+          /ما هو لون/, /ما هي الألوان/,
+          /كم عدد/, /كم مرة/,
+          /أي نوع/, /أي شكل/, /أي حجم/
+        ]
+        if (problematicPatterns.some(pattern => pattern.test(arabicText))) {
+          console.log('Skipping question with problematic pattern:', arabicText)
           continue
         }
         
@@ -380,8 +426,43 @@ export class HikayatAPI {
         
         // Check if correct answer option is too short or generic
         const correctOption = options[correctAnswer]
-        if (correctOption.length < 3 || ['نعم', 'لا', 'ربما', 'لا أعرف'].includes(correctOption)) {
+        if (correctOption.length < 3 || ['نعم', 'لا', 'ربما', 'لا أعرف', 'غير مذكور', 'غير معروف'].includes(correctOption)) {
           console.log('Skipping block with invalid correct answer option:', correctOption)
+          continue
+        }
+        
+        // Verify that the correct answer actually exists in the story
+        if (!this.verifyAnswerInStory(correctOption, storyText)) {
+          console.log('Skipping question - correct answer not found in story:', correctOption)
+          continue
+        }
+        
+        // Enhanced content validation: check if the question makes sense
+        const questionWords = arabicText.split(/\s+/).filter(word => word.length > 2)
+        const hasSpecificContent = questionWords.some(word => 
+          /[أ-ي]{3,}/.test(word) && 
+          !['ما', 'من', 'أين', 'متى', 'كيف', 'لماذا', 'أي', 'كم', 'هل'].includes(word)
+        )
+        
+        if (!hasSpecificContent) {
+          console.log('Skipping question without specific content:', arabicText)
+          continue
+        }
+        
+        // Check if all options are reasonable length
+        if (options.some(opt => opt.length < 2 || opt.length > 100)) {
+          console.log('Skipping block with unreasonable option lengths')
+          continue
+        }
+        
+        // Check if the correct answer is not too obvious (all options should be plausible)
+        const allOptionsSimilarLength = options.every(opt => 
+          opt.length >= Math.min(...options.map(o => o.length)) - 5 &&
+          opt.length <= Math.max(...options.map(o => o.length)) + 5
+        )
+        
+        if (!allOptionsSimilarLength) {
+          console.log('Skipping block with too obvious correct answer (length mismatch)')
           continue
         }
         
