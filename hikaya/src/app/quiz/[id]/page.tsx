@@ -19,6 +19,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
   const [score, setScore] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [showResults, setShowResults] = useState(false)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     const loadQuiz = async () => {
@@ -28,18 +29,34 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         if (storyData) {
           const parsedStory = JSON.parse(storyData)
           setStory(parsedStory)
-          
-          // Generate quiz questions
-          const storyContent = parsedStory.pages.map((page: any) => page.arabicText)
-          const quizQuestions = await HikayatAPI.generateQuiz(parsedStory.id, storyContent)
-          setQuestions(quizQuestions)
+          // Try to load quiz from localStorage
+          const quizKey = `currentQuiz-${parsedStory.id}`
+          const savedQuiz = localStorage.getItem(quizKey)
+          if (savedQuiz) {
+            const quizQuestions = JSON.parse(savedQuiz)
+            setQuestions(quizQuestions)
+            setLoadError(!quizQuestions || quizQuestions.length === 0)
+          } else {
+            // Generate quiz questions
+            const storyContent = parsedStory.pages.map((page: any) => page.arabicText)
+            const quizQuestions = await HikayatAPI.generateQuiz(parsedStory.id, storyContent)
+            setQuestions(quizQuestions)
+            if (!quizQuestions || quizQuestions.length === 0) {
+              setLoadError(true)
+            } else {
+              setLoadError(false)
+              localStorage.setItem(quizKey, JSON.stringify(quizQuestions))
+            }
+          }
+        } else {
+          setLoadError(true)
         }
       } catch (error) {
         console.error('Error loading quiz:', error)
+        setLoadError(true)
       }
       setIsLoading(false)
     }
-
     loadQuiz()
   }, [])
 
@@ -86,7 +103,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     )
   }
 
-  if (!isLoading && (!story || questions.length === 0)) {
+  if (loadError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm flex items-center justify-center">
         <div className="text-center">
@@ -112,6 +129,18 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     const percentage = Math.round((score / totalPossibleScore) * 100)
     const isExcellent = percentage >= 80
     const isGood = percentage >= 60
+
+    // Add retake and return handlers
+    const handleRetakeQuiz = () => {
+      setCurrentQuestionIndex(0)
+      setSelectedAnswer(null)
+      setIsAnswered(false)
+      setScore(0)
+      setShowResults(false)
+    }
+    const handleReturnToStory = () => {
+      if (story) router.push(`/story/${story.id}`)
+    }
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm">
@@ -165,11 +194,18 @@ export default function QuizPage({ params }: { params: { id: string } }) {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={handlePlayAgain}
+                onClick={handleRetakeQuiz}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300"
               >
-                قصة جديدة
+                إعادة الاختبار
                 <Star className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleReturnToStory}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-warm-light/50 text-text-arabic rounded-full hover:bg-warm-light transition-all duration-300"
+              >
+                العودة إلى القصة
+                <ArrowLeft className="w-5 h-5" />
               </button>
               <Link
                 href="/"
