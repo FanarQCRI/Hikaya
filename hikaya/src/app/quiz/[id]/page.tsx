@@ -9,7 +9,6 @@ import type { Story, Question } from '@/types'
 import { HikayatAPI } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import React from 'react'
-import SpeechFeedback from '@/components/SpeechFeedback'
 
 // Utility to strip leading/trailing brackets/parentheses
 function stripBrackets(text: string): string {
@@ -224,11 +223,6 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
                 العودة للقصة Return to Story
               </button>
             </div>
-
-            {/* Speech Feedback Integration */}
-            {story && (
-              <SpeechFeedback storyText={story.pages.map((p: any) => p.arabicText).join('\n')} />
-            )}
           </motion.div>
         </div>
       </div>
