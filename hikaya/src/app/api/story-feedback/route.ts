@@ -69,33 +69,37 @@ export async function POST(req: NextRequest)
 
         // Step 2: Generate feedback using story + transcript
         const prompt = `
-هذه هي القصة الأصلية:
+Act as an experienced Arabic language teacher. You are evaluating how well a child understood a story after listening to it.
+
+Below is the original story the child heard:
 
 ${story}
 
-وهذه هي إجابة الطفل على القصة بصوته:
+And here is what the child said in response:
 
 ${transcript}
 
-قم بتقييم إجابة الطفل بناءً على:
-1. **الملاءمة**: هل الإجابة مرتبطة بالقصة؟
-2. **الدقة**: هل المعلومات صحيحة حسب القصة؟
-3. **الاكتمال**: هل غطى النقاط الرئيسية؟
+Instructions:
+- First, compare the child's response with the story.
+- Then, evaluate how accurate, relevant, and complete the response is.
+- Use the following scoring rules:
+    • 1 star if the response is unrelated or meaningless
+    • 2-3 stars if it mentions only one idea or partial understanding
+    • 4-5 stars if it shows clear comprehension of multiple key ideas
 
-أعطِ تقييماً من 1 إلى 5 نجوم (⭐) بناءً على هذه المعايير.
+Then write a short encouraging comment (2-3 lines):
+- Be honest and constructive
+- Give praise if deserved
+- Suggest one improvement if needed
 
-ثم اكتب تعليقاً قصيراً (2-3 أسطر) يكون:
-- صادقاً في التقييم
-- مشجعاً ومحفزاً
-- يقدم اقتراحات للتحسين إذا لزم الأمر
+Your reply MUST be in Arabic only.
+Use this exact format:
 
-استخدم هذا التنسيق:
-التقييم: [عدد النجوم] ⭐
-التعليق: [التعليق هنا]
+التقييم: [number of stars] ⭐
+التعليق: [short encouraging comment here in Arabic DIRECTED DIRECTLY TOWARDS THE CHILD]
 
-مثال:
-التقييم: 3 ⭐⭐⭐
-التعليق: أحسنت! فهمت بعض أجزاء القصة جيداً. حاول أن تتذكر المزيد من التفاصيل المهمة في المرة القادمة.
+Do NOT include anything else. Be OBJECTIVE with your judgement and response.
+When generating your comment for the child, assume the role of a teacher that is trying to explain to his / her student why they got their score.
         `.trim()
 
         const chatRes = await fetch('https://api.fanar.qa/v1/chat/completions', {
