@@ -231,13 +231,40 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
             </p>
           </div>
           <button
-            onClick={handleFinishStory}
+            onClick={() => {
+              if (story) {
+                const minimalStory = {
+                  id: story.id,
+                  title: story.title,
+                  pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+                }
+                localStorage.setItem('currentStory', JSON.stringify(minimalStory))
+                router.push(`/quiz/${story.id}`)
+              }
+            }}
             className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-primary to-primary-light text-white text-xl md:text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
           >
             ابدأ الاختبار
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <div className="mt-2 text-text-arabic text-base w-full text-center">اختبر معلوماتك حول القصة واكسب النقاط!</div>
+          <button
+            onClick={() => {
+              if (story) {
+                const minimalStory = {
+                  id: story.id,
+                  title: story.title,
+                  pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+                }
+                localStorage.setItem('currentStory', JSON.stringify(minimalStory))
+                router.push(`/audio-understanding/${story.id}`)
+              }
+            }}
+            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-secondary to-accent text-white text-xl md:text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
+          >
+            فهم القصة بالصوت
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="mt-2 text-text-arabic text-base w-full text-center">اختر نوع التحدي الذي تريده بعد القصة!</div>
         </motion.div>
       </div>
     )
