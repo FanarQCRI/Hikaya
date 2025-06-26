@@ -70,6 +70,8 @@ export async function getStoryFromIndexedDB(key: string): Promise<any | null> {
  */
 export function cleanChapterText(text: string): string {
   return text
+    // Remove markdown headers (lines starting with # or ##)
+    .replace(/^#+\s?.*$/gim, '')
     // Remove bracketed tags like [العنوان], [الفصل الأول], [Title], [Chapter 1]
     .replace(/\[[^\]]*\]/gi, '')
     // Remove lines starting with section markers (arabic/english, any case)
@@ -113,8 +115,14 @@ export function cleanChapterText(text: string): string {
     .replace(/\b[a-zA-Z]+\b/g, '')
     // Remove colons and similar after empty tags or sections
     .replace(/^[\s:：\-*]+|[\s:：\-*]+$/gm, '')
+    // Remove stray non-Arabic punctuation (except . ، ؟ !)
+    .replace(/["'`~@#$%^&_=<>\[\]{}\/\\|;]+/g, '')
+    // Remove markdown bold/italic markers
+    .replace(/[*_]+/g, '')
     // Collapse multiple blank lines into a single line
     .replace(/\n{2,}/g, '\n')
+    // Collapse multiple spaces into one
+    .replace(/ +/g, ' ')
     // Remove leading/trailing whitespace and newlines
     .trim();
 } 

@@ -11,6 +11,20 @@ import { cn } from '@/lib/utils'
 import React from 'react'
 import SpeechFeedback from '@/components/SpeechFeedback'
 
+// Utility to strip leading/trailing brackets/parentheses
+function stripBrackets(text: string): string {
+  return text.replace(/^\s*[\[(]+|[\])]+\s*$/g, '').replace(/^\s*[()]+|[()]+\s*$/g, '').trim();
+}
+
+function getArabicFeedback(score: number, total: number): string {
+  if (score === 0) return 'حاول مرة أخرى!';
+  if (score <= 2) return 'بحاجة للمزيد من التدريب!';
+  if (score === 3) return 'جيد!';
+  if (score === 4) return 'جيد جداً!';
+  if (score === 5) return 'ممتاز!';
+  return '';
+}
+
 export default function QuizPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id } = React.use(params)
@@ -170,20 +184,20 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
             <h1 className="text-3xl font-bold text-text-arabic mb-4">
               مبروك! انتهيت من الاختبار
             </h1>
-            <p className="text-xl text-text-english/80 mb-6">
+            {/* <p className="text-xl text-text-english/80 mb-6">
               Congratulations! You completed the quiz
-            </p>
+            </p> */}
 
             {/* Score */}
             <div className="bg-warm-light/50 rounded-2xl p-6 mb-8">
               <div className="text-4xl font-bold text-primary mb-2">{score}</div>
               <div className="text-lg text-text-english/70 mb-2">من {totalPossibleScore} نقطة</div>
               <div className="text-2xl font-semibold text-text-arabic">
-                {isExcellent ? 'ممتاز!' : isGood ? 'جيد جداً!' : 'أحسنت!'}
+                {getArabicFeedback(score, totalPossibleScore)}
               </div>
             </div>
 
-            {/* Performance Message */}
+            {/* Performance Message
             <div className="mb-8">
               <p className="text-lg text-text-english/80">
                 {isExcellent 
@@ -192,8 +206,8 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
                   ? "Great work! You understood most of the story."
                   : "Good effort! Keep reading and learning more stories."
                 }
-              </p>
-            </div>
+              </p>/
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -270,10 +284,10 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
           {/* Question */}
           <div className="mb-8">
             <h2 className="text-2xl md:text-3xl font-semibold text-text-arabic mb-4 leading-relaxed">
-              {currentQuestion.arabicText}
+              {stripBrackets(currentQuestion.arabicText)}
             </h2>
             <p className="text-lg text-text-english/70 italic">
-              {currentQuestion.englishText}
+              {stripBrackets(currentQuestion.englishText)}
             </p>
           </div>
 
@@ -306,7 +320,7 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
                           {isWrong && <XCircle className="w-6 h-6 text-red-500" />}
                         </>
                       )}
-                      <span className="text-lg font-semibold text-text-arabic">{option}</span>
+                      <span className="text-lg font-semibold text-text-arabic">{stripBrackets(option)}</span>
                     </div>
                     <div className="w-8 h-8 rounded-full bg-warm-light/50 flex items-center justify-center text-sm font-semibold text-text-arabic">
                       {String.fromCharCode(65 + index)}
