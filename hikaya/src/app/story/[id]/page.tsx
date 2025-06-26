@@ -210,23 +210,34 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center max-w-xl mx-auto"
+          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center max-w-xl mx-auto flex flex-col items-center"
           {...({} as any)}
         >
-          <div className="mb-6 flex flex-col items-center">
-            {/* Fallback emoji illustration instead of missing SVG */}
-            <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
-            <h1 className="text-3xl font-extrabold text-text-arabic mb-2">أحسنت! أنهيت القصة 🎉</h1>
-            <p className="text-lg text-text-english/80 mb-4">Great job! You finished the story. Are you ready for a fun quiz?</p>
+          {/* Return to Story Button */}
+          <button
+            onClick={() => setShowCompletion(false)}
+            className="self-start mb-4 px-4 py-2 text-primary font-bold rounded-full hover:bg-primary/10 transition-all flex items-center gap-2 text-base"
+            style={{ alignSelf: 'flex-start' }}
+          >
+            <ArrowRight className="w-4 h-4" />
+            العودة للقصة
+          </button>
+          {/* Celebration Emoji */}
+          <div className="mb-4 flex flex-col items-center w-full">
+            <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🎉</div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-text-arabic mb-2 w-full text-center">أحسنت! أنهيت القصة 🎉</h1>
+            <p className="text-base md:text-lg text-text-english/80 mb-4 w-full text-center" dir="ltr" style={{ direction: 'ltr', unicodeBidi: 'plaintext' }}>
+              Great job! You finished the story. Are you ready for a fun quiz?
+            </p>
           </div>
           <button
             onClick={handleFinishStory}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-primary to-primary-light text-white text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-primary to-primary-light text-white text-xl md:text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
           >
             ابدأ الاختبار
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <div className="mt-4 text-text-arabic text-base">اختبر معلوماتك حول القصة واكسب النقاط!</div>
+          <div className="mt-2 text-text-arabic text-base w-full text-center">اختبر معلوماتك حول القصة واكسب النقاط!</div>
         </motion.div>
       </div>
     )
