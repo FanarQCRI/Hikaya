@@ -1,13 +1,14 @@
 "use client";
 
+import React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SpeechFeedback from "@/components/SpeechFeedback";
 import type { Story } from "@/types";
 
-export default function AudioUnderstandingPage({ params }: { params: { id: string } }) {
+export default function AudioUnderstandingPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = React.use(params);
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
 
