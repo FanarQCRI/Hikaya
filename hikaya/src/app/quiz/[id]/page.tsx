@@ -222,6 +222,12 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
               >
                 العودة للقصة Return to Story
               </button>
+              <button
+                onClick={() => { if (story) router.push(`/audio-understanding/${story.id}`) }}
+                className="px-6 py-3 bg-accent text-white rounded-full font-bold text-lg shadow hover:bg-accent-light transition"
+              >
+                فهم القصة بالصوت Audio Understanding
+              </button>
             </div>
           </motion.div>
         </div>
