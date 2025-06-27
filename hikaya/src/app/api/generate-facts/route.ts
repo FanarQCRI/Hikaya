@@ -13,22 +13,23 @@ export async function POST(req: NextRequest)
         : `Here is the chosen topic (if any):`
 
         const prompt = `
-Please generate one accurate and culturally significant fact related to Islamic or Arabic heritage, tradition, history, values, or beliefs.
-
-If one or more keywords are provided, the fact must also relate specifically to those topics.
-
-Strict instructions:
-- The fact must be short (1-2 lines only) and written in Arabic.
-- Do NOT include any explanation, heading, introduction, or comment like “بالتأكيد” or “إليك الحقيقة”.
-- Do NOT include any formatting characters such as ", ', \, etc..
-- Do NOT repeat common facts like “The Qur'an is the holy book” or “Arabic is the language of the Qur'an”.
-- Do NOT write more than one fact.
-- Do NOT return anything in English.
-- The output must only contain the Arabic fact on one line. Nothing else.
+أنت خبير في التراث الإسلامي والعربي. مهمتك إنشاء حقيقة واحدة دقيقة ومهمة ثقافياً.
 
 ${topicLine}
 
-Output only the fact, in Arabic. Nothing more.
+**القواعد الصارمة:**
+- الحقيقة يجب أن تكون قصيرة (سطر واحد أو سطرين فقط) ومكتوبة باللغة العربية
+- لا تكتب أي شرح أو عنوان أو مقدمة مثل "بالتأكيد" أو "إليك الحقيقة"
+- لا تكتب أي رموز تنسيق مثل ", ', \, إلخ
+- لا تكرر حقائق شائعة مثل "القرآن هو الكتاب المقدس" أو "العربية هي لغة القرآن"
+- لا تكتب أكثر من حقيقة واحدة
+- لا تكتب أي شيء باللغة الإنجليزية
+- المخرجات يجب أن تحتوي فقط على الحقيقة العربية في سطر واحد. لا شيء آخر.
+
+**مثال على التنسيق المطلوب:**
+الحقيقة: [الحقيقة العربية هنا]
+
+**مهم جداً:** اكتب فقط الحقيقة باللغة العربية. لا شيء آخر.
         `.trim()
 
         const res = await fetch('https://api.fanar.qa/v1/chat/completions', {

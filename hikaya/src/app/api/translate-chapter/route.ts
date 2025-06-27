@@ -40,7 +40,12 @@ export async function POST(req: NextRequest)
             body: JSON.stringify({
                 model: 'Fanar-Shaheen-MT-1',
                 langpair: 'ar-en',
-                text: cleanedText
+                text: cleanedText,
+                options: {
+                    preserve_formatting: true,
+                    preserve_numbers: true,
+                    preserve_names: true
+                }
             })
         })
 

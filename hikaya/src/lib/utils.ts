@@ -69,60 +69,46 @@ export async function getStoryFromIndexedDB(key: string): Promise<any | null> {
  * Handles both Arabic and English, any capitalization, and special characters.
  */
 export function cleanChapterText(text: string): string {
+  if (!text || typeof text !== 'string') return ''
+  
   return text
-    // Remove markdown headers (lines starting with # or ##)
-    .replace(/^#+\s?.*$/gim, '')
-    // Remove bracketed tags like [العنوان], [الفصل الأول], [Title], [Chapter 1]
-    .replace(/\[[^\]]*\]/gi, '')
-    // Remove lines starting with section markers (arabic/english, any case)
-    .replace(/^(الفصل|العنوان|chapter|title|section)\s*\d*.*$/gim, '')
-    // Remove explicit markers in-line (Title, Chapter 1, etc.)
-    .replace(/(Title|العنوان|Chapter ?\d*|الفصل ?\d*)/gi, '')
-    // Remove instruction headers like "الأول: مقدمة القصة والشخصيات" (at start of lines)
-    .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-    // Remove instruction headers with typos like "لأول: البداية" (missing hamza)
-    .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-    // Remove instruction headers like "الفصل الأول: مقدمة القصة والشخصيات" (at start of lines)
-    .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-    // Remove any line that starts with ordinal numbers followed by instruction text (at start of lines)
-    .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*$/gim, '')
-    // Remove ordinal numbers and instruction text anywhere in the text (not just at start)
-    .replace(/(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-    // Remove ordinal numbers with typos and instruction text anywhere in the text
-    .replace(/(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-    // Remove standalone ordinal numbers that might appear in text (including typos)
-    .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
-    // Remove instruction text that might appear anywhere
-    .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
-    // Remove any line that starts with "لأول:" or similar patterns
-    .replace(/^لأول\s*:.*$/gim, '')
-    .replace(/^لثاني\s*:.*$/gim, '')
-    .replace(/^لثالث\s*:.*$/gim, '')
-    .replace(/^لرابع\s*:.*$/gim, '')
-    .replace(/^لخامس\s*:.*$/gim, '')
-    // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
-    .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
-    .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
-    // Remove ordinal numbers that appear at the start of any sentence (after periods, exclamation, question marks)
-    .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '$1 ')
-    .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '$1 ')
-    // Remove ordinal numbers that appear anywhere in the text (more aggressive)
-    .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, ' ')
-    .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, ' ')
-    // Remove separators like --- or ——
-    .replace(/[-–—*]+/g, '')
-    // Remove all English-only words
-    .replace(/\b[a-zA-Z]+\b/g, '')
-    // Remove colons and similar after empty tags or sections
-    .replace(/^[\s:：\-*]+|[\s:：\-*]+$/gm, '')
-    // Remove stray non-Arabic punctuation (except . ، ؟ !)
-    .replace(/["'`~@#$%^&_=<>\[\]{}\/\\|;]+/g, '')
-    // Remove markdown bold/italic markers
-    .replace(/[*_]+/g, '')
-    // Collapse multiple blank lines into a single line
-    .replace(/\n{2,}/g, '\n')
-    // Collapse multiple spaces into one
-    .replace(/ +/g, ' ')
-    // Remove leading/trailing whitespace and newlines
-    .trim();
+    // Remove section markers and headers
+    .replace(/\[(?:العنوان|Title)\]:/g, '')
+    .replace(/\[(?:الفصل|Chapter) ?[١٢٣٤٥\d]+\]:/g, '')
+    .replace(/^(العنوان|الفصل|Title|Chapter).*$/gm, '')
+    
+    // Remove instruction artifacts
+    .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gm, '')
+    .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gm, '')
+    .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gm, '')
+    .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gm, '')
+    
+    // Remove standalone ordinal numbers
+    .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/g, '')
+    
+    // Remove instruction text
+    .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية)/g, '')
+    
+    // Remove lines starting with ordinal patterns
+    .replace(/^لأول\s*:.*$/gm, '')
+    .replace(/^لثاني\s*:.*$/gm, '')
+    .replace(/^لثالث\s*:.*$/gm, '')
+    .replace(/^لرابع\s*:.*$/gm, '')
+    .replace(/^لخامس\s*:.*$/gm, '')
+    
+    // Remove ordinal numbers at sentence beginnings
+    .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gm, '')
+    .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gm, '')
+    .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/g, '$1 ')
+    .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/g, '$1 ')
+    
+    // Remove ordinal numbers anywhere in text
+    .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/g, ' ')
+    .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/g, ' ')
+    
+    // Clean up extra whitespace and formatting
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\s+/g, ' ')
+    .replace(/^\s+|\s+$/gm, '')
+    .trim()
 } 

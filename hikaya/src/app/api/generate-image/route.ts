@@ -11,10 +11,17 @@ export async function POST(req: NextRequest)
         const cleanedChapter = cleanChapterText(chapter)
         // console.log("Hit with chapter: ", cleanedChapter)
         const prompt = `
-Read the following Arabic story chapter written for children:
+اقرأ هذا الفصل من قصة أطفال عربية:
+
 "${cleanedChapter}"
 
-Generate one colorful, storybook-style cartoony-not realistic illustration that visually represents the main scene and mood of this chapter. Must be Cartoonish and not realistic.
+أنشئ رسماً توضيحياً ملوناً واحداً بأسلوب قصص الأطفال الكرتوني (وليس واقعياً) يمثل المشهد الرئيسي ومزاج هذا الفصل. يجب أن يكون:
+- كرتوني وليس واقعياً
+- ملون ومشرق
+- مناسب للأطفال
+- يمثل المشهد الرئيسي في الفصل
+- يعكس مزاج القصة (سعيد، حزين، مثير، هادئ، إلخ)
+- بأسلوب رسوم متحركة عربية تقليدية
         `.trim()
 
         const res = await fetch('https://api.fanar.qa/v1/images/generations', {

@@ -69,37 +69,35 @@ export async function POST(req: NextRequest)
 
         // Step 2: Generate feedback using story + transcript
         const prompt = `
-Act as an experienced Arabic language teacher. You are evaluating how well a child understood a story after listening to it.
+أنت معلم عربي محترف تقوم بتقييم فهم الطفل لقصة بعد سماعها.
 
-Below is the original story the child heard:
+القصة الأصلية التي سمعها الطفل:
 
 ${story}
 
-And here is what the child said in response:
+وإليك ما قاله الطفل:
 
 ${transcript}
 
-Instructions:
-- First, compare the child's response with the story.
-- Then, evaluate how accurate, relevant, and complete the response is.
-- Use the following scoring rules:
-    • 1 star if the response is unrelated or meaningless
-    • 2-3 stars if it mentions only one idea or partial understanding
-    • 4-5 stars if it shows clear comprehension of multiple key ideas
+**تعليمات التقييم:**
+- قارن بين رد الطفل والقصة الأصلية
+- قيّم مدى دقة وملاءمة واكتمال الرد
+- استخدم قواعد التقييم التالية:
+  • نجمة واحدة إذا كان الرد غير مرتبط أو بلا معنى
+  • نجمتان إلى 3 نجوم إذا ذكر فكرة واحدة فقط أو فهم جزئي
+  • 4-5 نجوم إذا أظهر فهماً واضحاً لأفكار متعددة رئيسية
 
-Then write a short encouraging comment (2-3 lines):
-- Be honest and constructive
-- Give praise if deserved
-- Suggest one improvement if needed
+ثم اكتب تعليقاً قصيراً مشجعاً (2-3 أسطر):
+- كن صادقاً وبناءً
+- امدح إذا استحق
+- اقترح تحسيناً واحداً إذا لزم الأمر
 
-Your reply MUST be in Arabic only.
-Use this exact format:
+**التنسيق المطلوب - استخدم هذا التنسيق بالضبط:**
 
-التقييم: [number of stars] ⭐
-التعليق: [short encouraging comment here in Arabic DIRECTED DIRECTLY TOWARDS THE CHILD]
+التقييم: [عدد النجوم] ⭐
+التعليق: [تعليق مشجع قصير باللغة العربية موجه مباشرة للطفل]
 
-Do NOT include anything else. Be OBJECTIVE with your judgement and response.
-When generating your comment for the child, assume the role of a teacher that is trying to explain to his / her student why they got their score.
+**مهم جداً:** لا تكتب أي شيء آخر. كن موضوعياً في حكمك وردك. عند كتابة تعليقك للطفل، تخيل أنك معلم يحاول شرح سبب حصول الطالب على هذه الدرجة.
         `.trim()
 
         const chatRes = await fetch('https://api.fanar.qa/v1/chat/completions', {

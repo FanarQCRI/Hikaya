@@ -90,88 +90,136 @@ export class HikayatAPI {
 
   // Robustly parse story into 5 sections: [title, chapter1, chapter2, chapter3, chapter4]
   private static parseStorySections(story: string): string[] {
-    // First, clean the story of instruction headers using comprehensive patterns
-    const cleanedStory = story
-      // Remove instruction headers that might appear in the content (at start of lines)
-      .replace(/^(الأول|الثاني|المساعدة|الثالث:|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-      .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-      .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-      .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*$/gim, '')
-      // Remove ordinal numbers and instruction text anywhere in the text (not just at start)
-      .replace(/(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-      .replace(/(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-      // Remove standalone ordinal numbers that might appear in text (including typos)
+    console.log('Original story:', story.substring(0, 200) + '...')
+    
+    // Step 1: Clean the story of any instruction artifacts
+    let cleanedStory = story
+      // Remove any instruction headers or markers
+      .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+      .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+      .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+      .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+      
+      // Remove standalone ordinal numbers and instruction text
       .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
-      // Remove instruction text that might appear anywhere
-      .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
-      // Remove any line that starts with "لأول:" or similar patterns
+      .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية)/gim, '')
+      
+      // Remove lines that start with ordinal patterns
       .replace(/^لأول\s*:.*$/gim, '')
       .replace(/^لثاني\s*:.*$/gim, '')
       .replace(/^لثالث\s*:.*$/gim, '')
       .replace(/^لرابع\s*:.*$/gim, '')
       .replace(/^لخامس\s*:.*$/gim, '')
-      // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
+      
+      // Remove ordinal numbers at sentence beginnings
       .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
       .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
-      // Remove ordinal numbers that appear at the start of any sentence (after periods, exclamation, question marks)
       .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '$1 ')
       .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '$1 ')
-      // Remove ordinal numbers that appear anywhere in the text (more aggressive)
+      
+      // Remove ordinal numbers anywhere in text
       .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, ' ')
       .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, ' ')
+      
+      // Clean up extra whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
     
-    // Accepts both Arabic and English markers, e.g. [العنوان]:, [الفصل 1]:, [Title]:, [Chapter 1]:
-    const sectionRegex = /\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g
-    const matches = [...cleanedStory.matchAll(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)]
+    console.log('Cleaned story:', cleanedStory.substring(0, 200) + '...')
     
-    if (matches.length !== 5) {
-      // fallback: try to split by lines with colon and bracket
-      const fallbackSections = cleanedStory.split(/\n(?=\[.*?:\])/).map(s => s.trim()).filter(Boolean)
-      if (fallbackSections.length === 5) return fallbackSections
-      // fallback: try to split by double newlines
-      const doubleNewlineSections = cleanedStory.split(/\n\n+/).map(s => s.trim()).filter(Boolean)
-      if (doubleNewlineSections.length === 5) return doubleNewlineSections
-      return []
+    // Step 2: Try to find section markers
+    const sectionMarkers = [
+      /\[(?:العنوان|Title)\]:/g,
+      /\[(?:الفصل|Chapter) ?[١1]?:/g,
+      /\[(?:الفصل|Chapter) ?[٢2]?:/g,
+      /\[(?:الفصل|Chapter) ?[٣3]?:/g,
+      /\[(?:الفصل|Chapter) ?[٤4]?:/g
+    ]
+    
+    // Check if we have the expected section markers
+    const markerMatches = sectionMarkers.map(marker => [...cleanedStory.matchAll(marker)]).flat()
+    
+    if (markerMatches.length === 5) {
+      console.log('Found 5 section markers, parsing by markers')
+      // Split by section markers
+      const parts = cleanedStory.split(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)
+        .map(s => s.trim())
+        .filter(Boolean)
+      
+      if (parts.length === 5) {
+        // Clean each part of any remaining artifacts
+        const cleanedParts = parts.map(part => 
+          part
+            .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+            .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+            .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
+            .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
+            .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
+            .trim()
+        )
+        
+        console.log('Successfully parsed by markers:', cleanedParts.map(p => p.substring(0, 50) + '...'))
+        return cleanedParts
+      }
     }
     
-    // Split by the section markers
-    const parts = cleanedStory.split(/\[(?:العنوان|Title)\]:|\[(?:الفصل|Chapter) ?[١1]?:|\[(?:الفصل|Chapter) ?[٢2]?:|\[(?:الفصل|Chapter) ?[٣3]?:|\[(?:الفصل|Chapter) ?[٤4]?:/g)
-      .map(s => s.trim()).filter(Boolean)
+    // Step 3: Fallback - try to split by double newlines
+    console.log('Trying fallback parsing by double newlines')
+    const doubleNewlineSections = cleanedStory
+      .split(/\n\n+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 10) // Filter out very short sections
     
-    // Clean each section of any remaining instruction text using comprehensive patterns
-    const cleanedParts = parts.map(part => 
-      part
-        // Remove instruction headers that might appear in the content (at start of lines)
-        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-        .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-        .replace(/^(الفصل\s*(الأول|الثاني|الثالث|الرابع|الخامس))\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية).*$/gim, '')
-        .replace(/^(\d+|[أ-ي]+)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*$/gim, '')
-        // Remove ordinal numbers and instruction text anywhere in the text (not just at start)
-        .replace(/(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-        .replace(/(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|أو|البداية).*?(?=\n|$)/gim, '')
-        // Remove standalone ordinal numbers that might appear in text (including typos)
-        .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
-        // Remove instruction text that might appear anywhere
-        .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
-        // Remove any line that starts with "لأول:" or similar patterns
-        .replace(/^لأول\s*:.*$/gim, '')
-        .replace(/^لثاني\s*:.*$/gim, '')
-        .replace(/^لثالث\s*:.*$/gim, '')
-        .replace(/^لرابع\s*:.*$/gim, '')
-        .replace(/^لخامس\s*:.*$/gim, '')
-        // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
-        .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
-        .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
-        // Remove ordinal numbers that appear at the start of any sentence (after periods, exclamation, question marks)
-        .replace(/([.!?])\s*(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '$1 ')
-        .replace(/([.!?])\s*(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '$1 ')
-        // Remove ordinal numbers that appear anywhere in the text (more aggressive)
-        .replace(/\s+(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, ' ')
-        .replace(/\s+(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, ' ')
-        .trim()
-    )
+    if (doubleNewlineSections.length >= 4) {
+      // If we have 4+ sections, take the first 5 or pad with empty strings
+      const sections = doubleNewlineSections.slice(0, 5)
+      while (sections.length < 5) {
+        sections.push('')
+      }
+      
+      // Clean each section
+      const cleanedSections = sections.map(section => 
+        section
+          .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+          .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s*:\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|البداية).*$/gim, '')
+          .replace(/\b(الأول|الثاني|الثالث|الرابع|الخامس|لأول|لثاني|لثالث|لرابع|لخامس)\b/gim, '')
+          .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
+          .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
+          .trim()
+      )
+      
+      console.log('Successfully parsed by double newlines:', cleanedSections.map(s => s.substring(0, 50) + '...'))
+      return cleanedSections
+    }
     
-    return cleanedParts.length === 5 ? cleanedParts : []
+    // Step 4: Last resort - split the story into roughly equal parts
+    console.log('Using last resort parsing - splitting into equal parts')
+    const totalLength = cleanedStory.length
+    const partLength = Math.floor(totalLength / 5)
+    
+    const sections = []
+    for (let i = 0; i < 5; i++) {
+      const start = i * partLength
+      const end = i === 4 ? totalLength : (i + 1) * partLength
+      let section = cleanedStory.substring(start, end)
+      
+      // Try to break at sentence boundaries
+      if (i < 4) {
+        const lastPeriod = section.lastIndexOf('.')
+        const lastExclamation = section.lastIndexOf('!')
+        const lastQuestion = section.lastIndexOf('?')
+        const lastBreak = Math.max(lastPeriod, lastExclamation, lastQuestion)
+        
+        if (lastBreak > partLength * 0.7) { // If we can break at a sentence boundary
+          section = section.substring(0, lastBreak + 1)
+        }
+      }
+      
+      sections.push(section.trim())
+    }
+    
+    console.log('Last resort parsing result:', sections.map(s => s.substring(0, 50) + '...'))
+    return sections
   }
 
   private static extractTitleFromSections(sections: string[]): string {
@@ -319,59 +367,102 @@ export class HikayatAPI {
   
   // Parse MCQ questions with validation
   private static parseMCQQuestions(raw: string, storyId: string, storyText: string): any[] {
+    console.log('Raw MCQ output:', raw.substring(0, 300) + '...')
+    
     const questions: any[] = []
     
-    // Split into question blocks
-    const questionBlocks = raw.split(/\n(?=\d+\.)/).map((q: string) => q.trim()).filter(Boolean)
+    // Step 1: Clean the raw input
+    let cleanedRaw = raw
+      .replace(/```/g, '') // Remove markdown code blocks
+      .replace(/^\s*[-*]\s*/gm, '') // Remove bullet points
+      .trim()
+    
+    // Step 2: Try different parsing strategies
+    let questionBlocks: string[] = []
+    
+    // Strategy 1: Split by numbered questions
+    questionBlocks = cleanedRaw.split(/\n(?=\d+\.)/).map(q => q.trim()).filter(Boolean)
+    
+    // Strategy 2: If that didn't work, try splitting by Arabic numerals
+    if (questionBlocks.length < 3) {
+      questionBlocks = cleanedRaw.split(/\n(?=[١٢٣٤٥]\.)/).map(q => q.trim()).filter(Boolean)
+    }
+    
+    // Strategy 3: If still not enough, try splitting by double newlines
+    if (questionBlocks.length < 3) {
+      questionBlocks = cleanedRaw.split(/\n\n+/).map(q => q.trim()).filter(Boolean)
+    }
     
     console.log(`Found ${questionBlocks.length} question blocks`)
     
     for (const block of questionBlocks) {
       try {
-        const lines = block.split('\n').map((l: string) => l.trim()).filter(Boolean)
-        if (lines.length < 6) {
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
+        if (lines.length < 5) { // Need at least question + 4 options
           console.log('Skipping block with insufficient lines:', lines.length)
           continue
         }
         
-        // Extract question text
-        let arabicText = lines[0].replace(/^\d+\.\s*/, '').trim()
+        // Extract question text (first line)
+        let arabicText = lines[0].replace(/^[١٢٣٤٥\d]+\.\s*/, '').trim()
         
-        // Extract options (lines 1-4 should be options)
-        const options = lines.slice(1, 5).map((opt: string) => {
-          const cleaned = opt.replace(/^[أ-دA-D]\.\s*/, '').trim()
-          return cleaned
-        })
-        
-        // Enhanced validation checks
-        if (arabicText === 'السؤال' || !arabicText || arabicText.length < 10) {
-          console.log('Skipping invalid question text:', arabicText)
+        // Skip if question is too short or generic
+        if (!arabicText || arabicText.length < 8) {
+          console.log('Skipping block with invalid question text:', arabicText)
           continue
         }
         
-        // Check if question is too generic
-        const genericQuestions = ['ما هي القصة؟', 'ماذا حدث؟', 'من هو؟', 'أين؟', 'متى؟', 'كيف؟', 'لماذا؟']
+        // Skip generic questions
+        const genericQuestions = ['ما هي القصة؟', 'ماذا حدث؟', 'من هو؟', 'أين؟', 'متى؟', 'كيف؟', 'لماذا؟', 'السؤال']
         if (genericQuestions.some(gq => arabicText.includes(gq))) {
           console.log('Skipping generic question:', arabicText)
           continue
         }
         
-        // Check if question asks about information not likely to be in the story
-        const problematicPatterns = [
-          /كم عمر/, /كم سنة/, /أي يوم/, /أي شهر/, /أي سنة/, /أي تاريخ/,
-          /كم ساعة/, /كم دقيقة/, /كم ثانية/,
-          /ما هو لون/, /ما هي الألوان/,
-          /كم عدد/, /كم مرة/,
-          /أي نوع/, /أي شكل/, /أي حجم/
-        ]
-        if (problematicPatterns.some(pattern => pattern.test(arabicText))) {
-          console.log('Skipping question with problematic pattern:', arabicText)
+        // Extract options - look for lines starting with أ, ب, ج, د
+        const options: string[] = []
+        let correctAnswerIndex = -1
+        let correctAnswerLine = ''
+        
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i]
+          
+          // Check if this is an option line
+          const optionMatch = line.match(/^([أ-دA-D])\.\s*(.+)$/)
+          if (optionMatch) {
+            const letter = optionMatch[1]
+            const optionText = optionMatch[2].trim()
+            
+            if (optionText && optionText.length > 1) {
+              options.push(optionText)
+            }
+          }
+          
+          // Check if this is the correct answer line
+          if (line.includes('الإجابة الصحيحة') || line.includes('الجواب الصحيح')) {
+            correctAnswerLine = line
+            const match = line.match(/[:：]\s*([أ-دA-D])/)
+            if (match) {
+              const letterMap: Record<string, number> = { 
+                'أ': 0, 'A': 0, 'a': 0,
+                'ب': 1, 'B': 1, 'b': 1,
+                'ج': 2, 'C': 2, 'c': 2,
+                'د': 3, 'D': 3, 'd': 3
+              }
+              correctAnswerIndex = letterMap[match[1]] || -1
+            }
+          }
+        }
+        
+        // Validate we have exactly 4 options
+        if (options.length !== 4) {
+          console.log('Skipping block with wrong number of options:', options.length)
           continue
         }
         
-        // Check if options are valid
-        if (options.some((opt: string) => !opt || opt.length < 2 || opt.includes('السؤال'))) {
-          console.log('Skipping block with invalid options:', options)
+        // Validate correct answer
+        if (correctAnswerIndex < 0 || correctAnswerIndex >= 4) {
+          console.log('Skipping block with invalid correct answer index:', correctAnswerIndex)
           continue
         }
         
@@ -394,38 +485,8 @@ export class HikayatAPI {
           continue
         }
         
-        // Extract correct answer
-        const correctLine = lines.find((l: string) => l.includes('الإجابة الصحيحة')) || ''
-        const correctLetterMatch = correctLine.match(/[:：]\s*([أ-دA-D])/)
-        
-        if (!correctLetterMatch) {
-          console.log('Skipping block with invalid correct answer format:', correctLine)
-          continue
-        }
-        
-        const correctLetter = correctLetterMatch[1]
-        const letterMap: Record<string, number> = { 
-          'أ': 0, 'A': 0, 'a': 0,
-          'ب': 1, 'B': 1, 'b': 1,
-          'ج': 2, 'C': 2, 'c': 2,
-          'د': 3, 'D': 3, 'd': 3
-        }
-        
-        if (!(correctLetter in letterMap)) {
-          console.log('Skipping block with invalid correct answer letter:', correctLetter)
-          continue
-        }
-        
-        const correctAnswer = letterMap[correctLetter]
-        
-        // Additional validation: ensure the correct answer index is valid
-        if (correctAnswer < 0 || correctAnswer >= options.length) {
-          console.log('Skipping block with invalid correct answer index:', correctAnswer)
-          continue
-        }
-        
-        // Check if correct answer option is too short or generic
-        const correctOption = options[correctAnswer]
+        // Check if correct answer option is valid
+        const correctOption = options[correctAnswerIndex]
         if (correctOption.length < 3 || ['نعم', 'لا', 'ربما', 'لا أعرف', 'غير مذكور', 'غير معروف'].includes(correctOption)) {
           console.log('Skipping block with invalid correct answer option:', correctOption)
           continue
@@ -437,7 +498,24 @@ export class HikayatAPI {
           continue
         }
         
-        // Enhanced content validation: check if the question makes sense
+        // Check if all options are reasonable length
+        if (options.some(opt => opt.length < 2 || opt.length > 100)) {
+          console.log('Skipping block with unreasonable option lengths')
+          continue
+        }
+        
+        // Check if the correct answer is not too obvious
+        const allOptionsSimilarLength = options.every(opt => 
+          opt.length >= Math.min(...options.map(o => o.length)) - 5 &&
+          opt.length <= Math.max(...options.map(o => o.length)) + 5
+        )
+        
+        if (!allOptionsSimilarLength) {
+          console.log('Skipping block with too obvious correct answer (length mismatch)')
+          continue
+        }
+        
+        // Additional validation: check if the question makes sense
         const questionWords = arabicText.split(/\s+/).filter(word => word.length > 2)
         const hasSpecificContent = questionWords.some(word => 
           /[أ-ي]{3,}/.test(word) && 
@@ -449,36 +527,19 @@ export class HikayatAPI {
           continue
         }
         
-        // Check if all options are reasonable length
-        if (options.some(opt => opt.length < 2 || opt.length > 100)) {
-          console.log('Skipping block with unreasonable option lengths')
-          continue
-        }
-        
-        // Check if the correct answer is not too obvious (all options should be plausible)
-        const allOptionsSimilarLength = options.every(opt => 
-          opt.length >= Math.min(...options.map(o => o.length)) - 5 &&
-          opt.length <= Math.max(...options.map(o => o.length)) + 5
-        )
-        
-        if (!allOptionsSimilarLength) {
-          console.log('Skipping block with too obvious correct answer (length mismatch)')
-          continue
-        }
-        
         questions.push({
           id: `${storyId}-q${questions.length + 1}`,
           arabicText,
           englishText: '',
           options,
-          correctAnswer,
+          correctAnswer: correctAnswerIndex,
           points: 1
         })
         
         console.log(`Successfully parsed question ${questions.length}:`, {
           question: arabicText.substring(0, 50) + '...',
           options: options.map(opt => opt.substring(0, 30) + '...'),
-          correctAnswer: correctAnswer,
+          correctAnswer: correctAnswerIndex,
           correctOption: correctOption
         })
         
@@ -488,11 +549,7 @@ export class HikayatAPI {
       }
     }
     
-    // Ensure we have exactly 5 questions
-    if (questions.length !== 5) {
-      console.log(`Warning: Generated ${questions.length} questions instead of 5`)
-    }
-    
+    console.log(`Final result: Parsed ${questions.length} valid questions`)
     return questions
   }
 }

@@ -11,67 +11,116 @@ export async function POST(req: NextRequest)
 
         if (attempt === 1) {
             prompt = `
-You are a skilled Arabic educator. You will be given a children's story in Arabic.
-Your task is to generate exactly 5 multiple-choice questions (MCQs) based ONLY on information stated explicitly in the story.
+أنت معلم عربي محترف. مهمتك إنشاء 5 أسئلة اختيار من متعدد بناءً على قصة أطفال عربية.
 
-Here is the story:
+هذه القصة:
 
 ${story}
 
-✳️ Strict rules:
-- Create exactly 5 questions. No more, no less.
-- All questions must ask about facts explicitly stated in the story text (not inferred or general knowledge).
-- Each question must relate to a detail directly mentioned in the story: names, places, events, actions, outcomes.
-- The correct answer must appear word-for-word in the story.
-- Incorrect answers must be related but wrong, and either appear in the story or be reasonable distractors.
-- Do not invent facts.
-- Do not repeat generic or vague placeholders like "[Question about event]".
-- Questions must be meaningful, well-formed, and match the child's comprehension level.
+**القواعد الصارمة:**
+- أنشئ بالضبط 5 أسئلة. لا أكثر ولا أقل.
+- جميع الأسئلة يجب أن تكون عن حقائق مذكورة صراحة في القصة
+- كل سؤال يجب أن يتعلق بتفصيل مذكور في القصة: أسماء، أماكن، أحداث، أفعال، نتائج
+- الإجابة الصحيحة يجب أن تظهر حرفياً في القصة
+- الإجابات الخاطئة يجب أن تكون منطقية ومتعلقة بالموضوع
+- لا تخترع حقائق غير موجودة في القصة
 
-📝 Required question types (one of each):
-1. A question about a character’s name
-2. A question about a place mentioned in the story
-3. A question about a specific event
-4. A question about an action performed by someone
-5. A question about the result or ending of the story
+**أنواع الأسئلة المطلوبة (واحد من كل نوع):**
+1. سؤال عن اسم شخصية
+2. سؤال عن مكان مذكور في القصة
+3. سؤال عن حدث محدد
+4. سؤال عن فعل قام به شخص ما
+5. سؤال عن النتيجة أو نهاية القصة
 
-✳️ Output Format (in Arabic only):
-1. [Arabic question clearly about the story]
-أ. [option]
-ب. [option]
-ج. [option]
-د. [option]
+**التنسيق المطلوب - استخدم هذا التنسيق بالضبط:**
+
+1. [السؤال باللغة العربية]
+أ. [الخيار الأول]
+ب. [الخيار الثاني]
+ج. [الخيار الثالث]
+د. [الخيار الرابع]
 الإجابة الصحيحة: [أ أو ب أو ج أو د]
 
-2. [next question]...
+2. [السؤال الثاني]
+أ. [الخيار الأول]
+ب. [الخيار الثاني]
+ج. [الخيار الثالث]
+د. [الخيار الرابع]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
 
-⚠️ DO NOT include instructions, explanations, or examples.
-⚠️ ONLY output the Arabic questions in the format above.
+3. [السؤال الثالث]
+أ. [الخيار الأول]
+ب. [الخيار الثاني]
+ج. [الخيار الثالث]
+د. [الخيار الرابع]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+4. [السؤال الرابع]
+أ. [الخيار الأول]
+ب. [الخيار الثاني]
+ج. [الخيار الثالث]
+د. [الخيار الرابع]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+5. [السؤال الخامس]
+أ. [الخيار الأول]
+ب. [الخيار الثاني]
+ج. [الخيار الثالث]
+د. [الخيار الرابع]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+**مهم جداً:** اكتب باللغة العربية فقط. لا تكتب أي تعليقات أو ملاحظات أو شرح.
             `.trim()
         } else {
             prompt = `
-You will be given an Arabic story. Create exactly 5 multiple choice questions (MCQs) based strictly on the story.
-
-Here is the story:
+أنشئ 5 أسئلة اختيار من متعدد بناءً على هذه القصة العربية:
 
 ${story}
 
-✅ Requirements:
-- Exactly 5 MCQs.
-- The correct answer must be stated word-for-word in the story.
-- The question must relate to something specific: a name, place, event, action, or outcome.
-- All answers (correct and incorrect) must be logical and Arabic only.
-- Do not include generic placeholders or summaries.
+**المتطلبات:**
+- بالضبط 5 أسئلة
+- الإجابة الصحيحة يجب أن تكون مذكورة حرفياً في القصة
+- كل سؤال يجب أن يتعلق بشيء محدد: اسم، مكان، حدث، فعل، أو نتيجة
+- جميع الإجابات يجب أن تكون منطقية وباللغة العربية فقط
 
-📝 Format:
-1. [Arabic question]
-أ. [option]
-ب. [option]
-ج. [option]
-د. [option]
+**التنسيق:**
+
+1. [السؤال]
+أ. [خيار]
+ب. [خيار]
+ج. [خيار]
+د. [خيار]
 الإجابة الصحيحة: [أ أو ب أو ج أو د]
 
-⚠️ Your response must be in Arabic only. Do not include commentary or notes.
+2. [السؤال]
+أ. [خيار]
+ب. [خيار]
+ج. [خيار]
+د. [خيار]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+3. [السؤال]
+أ. [خيار]
+ب. [خيار]
+ج. [خيار]
+د. [خيار]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+4. [السؤال]
+أ. [خيار]
+ب. [خيار]
+ج. [خيار]
+د. [خيار]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+5. [السؤال]
+أ. [خيار]
+ب. [خيار]
+ج. [خيار]
+د. [خيار]
+الإجابة الصحيحة: [أ أو ب أو ج أو د]
+
+**مهم:** اكتب باللغة العربية فقط. لا تكتب أي تعليقات أو ملاحظات.
             `.trim()
         }
 
@@ -84,8 +133,8 @@ ${story}
             body: JSON.stringify({
                 model: 'Fanar-S-1-7B',
                 messages: [{ role: 'user', content: prompt }],
-                temperature: attempt === 1 ? 0.3 : 0.1,
-                max_tokens: 1500
+                temperature: attempt === 1 ? 0.2 : 0.1,
+                max_tokens: 2000
             })
         })
 
