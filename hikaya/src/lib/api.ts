@@ -105,11 +105,11 @@ export class HikayatAPI {
       // Remove instruction text that might appear anywhere
       .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
       // Remove any line that starts with "لأول:" or similar patterns
-      .replace(/^لأول\s*:.*$/gim, '')
-      .replace(/^لثاني\s*:.*$/gim, '')
-      .replace(/^لثالث\s*:.*$/gim, '')
-      .replace(/^لرابع\s*:.*$/gim, '')
-      .replace(/^لخامس\s*:.*$/gim, '')
+      // .replace(/^لأول\s*:.*$/gim, '')
+      // .replace(/^لثاني\s*:.*$/gim, '')
+      // .replace(/^لثالث\s*:.*$/gim, '')
+      // .replace(/^لرابع\s*:.*$/gim, '')
+      // .replace(/^لخامس\s*:.*$/gim, '')
       // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
       .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
       .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
@@ -154,11 +154,11 @@ export class HikayatAPI {
         // Remove instruction text that might appear anywhere
         .replace(/(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)\s*أو\s*(مقدمة|المشكلة|محاولة|الحل|النهاية|القصة|الشخصيات|التحدي|الحل|البداية)/gim, '')
         // Remove any line that starts with "لأول:" or similar patterns
-        .replace(/^لأول\s*:.*$/gim, '')
-        .replace(/^لثاني\s*:.*$/gim, '')
-        .replace(/^لثالث\s*:.*$/gim, '')
-        .replace(/^لرابع\s*:.*$/gim, '')
-        .replace(/^لخامس\s*:.*$/gim, '')
+        // .replace(/^لأول\s*:.*$/gim, '')
+        // .replace(/^لثاني\s*:.*$/gim, '')
+        // .replace(/^لثالث\s*:.*$/gim, '')
+        // .replace(/^لرابع\s*:.*$/gim, '')
+        // .replace(/^لخامس\s*:.*$/gim, '')
         // Remove ordinal numbers at the beginning of sentences or paragraphs (with or without spaces)
         .replace(/^(الأول|الثاني|الثالث|الرابع|الخامس)\s+/gim, '')
         .replace(/^(لأول|لثاني|لثالث|لرابع|لخامس)\s+/gim, '')
