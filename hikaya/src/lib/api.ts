@@ -6,7 +6,7 @@ export class HikayatAPI {
     let attempts = 0;
     let sections: string[] = [];
     let arabicStory = '';
-    const maxAttempts = 5; // Increased attempts for better quality
+    const maxAttempts = 7; // Increased attempts for better quality
     
     while (attempts < maxAttempts) {
       attempts++;
