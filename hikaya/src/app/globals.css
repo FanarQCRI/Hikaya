@@ -55,12 +55,29 @@ body {
   font-family: var(--font-arabic);
   direction: rtl;
   text-align: right;
+  /* Improved Arabic text rendering */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .english-text {
   font-family: var(--font-english);
   direction: ltr;
   text-align: left;
+  /* Improved English text rendering */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Professional typography improvements */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
 }
 
 /* Custom scrollbar */
@@ -125,6 +142,28 @@ body {
   40%, 100% { transform: rotateZ(0); }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -155,6 +194,14 @@ body {
   animation: wiggle 1s ease-in-out infinite;
 }
 
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
 /* Glassmorphism utility */
 .glass-card {
   background: rgba(255, 255, 255, 0.55);
@@ -172,4 +219,145 @@ body {
 /* Radial vignette background */
 .bg-vignette {
   background: radial-gradient(ellipse at 60% 0%, #fffbe6 60%, #f5debb 100%);
+}
+
+/* Professional story page specific styles */
+.story-container {
+  /* Ensure consistent height across different content lengths */
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-content {
+  /* Fixed aspect ratio for consistent layout */
+  aspect-ratio: 16/10;
+  min-height: 500px;
+  max-height: 800px;
+}
+
+.story-text-container {
+  /* Ensure text area maintains consistent height */
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.story-image-container {
+  /* Fixed aspect ratio for images */
+  aspect-ratio: 1/1;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Responsive typography for story text */
+.story-text-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.story-text-body {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  line-height: 1.8;
+  font-weight: 600;
+}
+
+/* Professional button styles */
+.btn-primary {
+  @apply px-4 py-2 bg-primary text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-secondary text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105;
+}
+
+.btn-outline {
+  @apply px-4 py-2 border border-primary text-primary rounded-full font-medium hover:bg-primary hover:text-white transition-all duration-200;
+}
+
+/* Professional card styles */
+.card {
+  @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-warm/20 overflow-hidden;
+}
+
+.card-header {
+  @apply bg-warm-light/40 border-b border-warm/20 p-4;
+}
+
+.card-body {
+  @apply p-6;
+}
+
+.card-footer {
+  @apply bg-warm-light/30 border-t border-warm/20 p-4;
+}
+
+/* Professional navigation styles */
+.nav-dot {
+  @apply w-2 h-2 rounded-full transition-all duration-300;
+}
+
+.nav-dot.active {
+  @apply bg-primary scale-125;
+}
+
+.nav-dot.inactive {
+  @apply bg-primary/30;
+}
+
+/* Professional loading states */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+/* Professional focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+}
+
+/* Professional hover effects */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Professional responsive utilities */
+.container-responsive {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.grid-responsive {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* Professional spacing utilities */
+.space-y-responsive > * + * {
+  @apply mt-4 md:mt-6;
+}
+
+.space-x-responsive > * + * {
+  @apply mr-4 md:mr-6;
+}
+
+/* Professional text utilities */
+.text-responsive {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.heading-responsive {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* Professional shadow utilities */
+.shadow-soft {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-medium {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-strong {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }

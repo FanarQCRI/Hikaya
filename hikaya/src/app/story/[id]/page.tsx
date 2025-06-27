@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Volume2, Globe, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Volume2, Globe, ChevronLeft, ChevronRight, Home, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Story, StoryPage } from '@/types'
@@ -203,68 +203,83 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const isFirstPage = currentPage === 0
   const isLastPage = currentPage === story.pages.length - 1
 
+  // Debug logging
+  console.log('Current page data:', currentPageData)
+  console.log('Image URL:', currentPageData?.imageUrl)
+  console.log('Arabic text:', currentPageData?.arabicText?.substring(0, 50))
+
   // Show completion screen if last page and showCompletion is true
   if (showCompletion && story) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center max-w-xl mx-auto flex flex-col items-center"
+          className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 text-center max-w-2xl mx-auto w-full"
           {...({} as any)}
         >
           {/* Return to Story Button */}
           <button
             onClick={() => setShowCompletion(false)}
-            className="self-start mb-4 px-4 py-2 text-primary font-bold rounded-full hover:bg-primary/10 transition-all flex items-center gap-2 text-base"
-            style={{ alignSelf: 'flex-start' }}
+            className="self-start mb-6 px-4 py-2 text-primary font-bold rounded-full hover:bg-primary/10 transition-all flex items-center gap-2 text-base"
           >
             <ArrowRight className="w-4 h-4" />
             العودة للقصة
           </button>
-          {/* Celebration Emoji */}
-          <div className="mb-4 flex flex-col items-center w-full">
-            <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🎉</div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-text-arabic mb-2 w-full text-center">أحسنت! أنهيت القصة 🎉</h1>
-            <p className="text-base md:text-lg text-text-english/80 mb-4 w-full text-center" dir="ltr" style={{ direction: 'ltr', unicodeBidi: 'plaintext' }}>
+          
+          {/* Celebration Content */}
+          <div className="mb-8">
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-text-arabic mb-3">
+              أحسنت! أنهيت القصة
+            </h1>
+            <p className="text-lg text-text-english/80 mb-6">
               Great job! You finished the story. Are you ready for a fun quiz?
             </p>
           </div>
-          <button
-            onClick={() => {
-              if (story) {
-                const minimalStory = {
-                  id: story.id,
-                  title: story.title,
-                  pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+          
+          {/* Action Buttons */}
+          <div className="space-y-4">
+            <button
+              onClick={() => {
+                if (story) {
+                  const minimalStory = {
+                    id: story.id,
+                    title: story.title,
+                    pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+                  }
+                  localStorage.setItem('currentStory', JSON.stringify(minimalStory))
+                  router.push(`/quiz/${story.id}`)
                 }
-                localStorage.setItem('currentStory', JSON.stringify(minimalStory))
-                router.push(`/quiz/${story.id}`)
-              }
-            }}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-primary to-primary-light text-white text-xl md:text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
-          >
-            ابدأ الاختبار
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={() => {
-              if (story) {
-                const minimalStory = {
-                  id: story.id,
-                  title: story.title,
-                  pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+              }}
+              className="w-full md:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-primary-light text-white text-lg md:text-xl font-bold rounded-full shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              ابدأ الاختبار
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            
+            <button
+              onClick={() => {
+                if (story) {
+                  const minimalStory = {
+                    id: story.id,
+                    title: story.title,
+                    pages: story.pages.map(p => ({ arabicText: p.arabicText, englishText: p.englishText || '' }))
+                  }
+                  localStorage.setItem('currentStory', JSON.stringify(minimalStory))
+                  router.push(`/audio-understanding/${story.id}`)
                 }
-                localStorage.setItem('currentStory', JSON.stringify(minimalStory))
-                router.push(`/audio-understanding/${story.id}`)
-              }
-            }}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-secondary to-accent text-white text-xl md:text-2xl font-extrabold rounded-full shadow-xl hover:scale-105 transition-all duration-300 mb-4"
-          >
-            فهم القصة بالصوت
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div className="mt-2 text-text-arabic text-base w-full text-center">اختر نوع التحدي الذي تريده بعد القصة!</div>
+              }}
+              className="w-full md:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-secondary to-accent text-white text-lg md:text-xl font-bold rounded-full shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              فهم القصة بالصوت
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="mt-6 text-text-arabic text-base">
+            اختر نوع التحدي الذي تريده بعد القصة!
+          </div>
         </motion.div>
       </div>
     )
@@ -272,68 +287,134 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-light via-accent-light to-warm">
-      {/* Header */}
-      <div className="w-full px-4 py-4">
-        <div className="flex justify-center pl-[1000px] pt-8">
-          <Link
-            href="/setup"
-            className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english mb-8 transition-colors text-lg font-medium"
-          >
-            العودة للصفحة السابقة
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+      {/* Professional Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-warm/20 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Navigation */}
+            <div className="flex items-center gap-4">
+              <Link
+                href="/setup"
+                className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-warm/20"
+              >
+                <ArrowRight className="w-4 h-4" />
+                العودة
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-text-english/70 hover:text-text-english transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-warm/20"
+              >
+                <Home className="w-4 h-4" />
+                الرئيسية
+              </Link>
+            </div>
+            
+            {/* Story Title */}
+            <div className="text-center flex-1 max-w-md mx-4">
+              <h1 className="text-lg md:text-xl font-bold text-text-arabic truncate">
+                {cleanChapterText(story.title)}
+              </h1>
+            </div>
+            
+            {/* Page Counter */}
+            <div className="flex items-center gap-2 text-sm text-text-english/60">
+              <BookOpen className="w-4 h-4" />
+              <span>{currentPage + 1} من {story.pages.length}</span>
+            </div>
+          </div>
         </div>
-      </div>
-      {/* Story Title (now below header, above content) */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-text-arabic mb-2">
-          {cleanChapterText(story.title)}
-        </h1>
-      </div>
+      </header>
 
-      {/* Story Content */}
-      <div className="max-w-7xl mx-auto px-2 py-12">
-        <div className="relative flex flex-col md:flex-row-reverse items-stretch bg-[#fdf6e3] rounded-[2.5rem] shadow-2xl border border-warm overflow-hidden min-h-[500px]">
-          {/* Right page (text) */}
-          <div className="flex-1 flex flex-col justify-center items-center px-10 py-14 md:py-20 md:pr-20 md:pl-14">
-            <div className="space-y-6"><motion.div
-              key={currentPage}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-              {...({} as any)}
-            >
-              <div className="space-y-4">
-                {currentPage === 0 ? (
-                  <div className="arabic-text text-4xl md:text-5xl leading-relaxed text-text-arabic font-[Amiri,serif] drop-shadow-md text-center font-bold" style={{ fontWeight: 800, letterSpacing: '-0.01em', maxWidth: '100%', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-warm/30 overflow-hidden">
+          {/* Story Container - Fixed Height */}
+          <div className="min-h-[70vh] md:min-h-[75vh] flex flex-col lg:flex-row">
+            {/* Left Side - Image */}
+            <div className="lg:w-1/2 p-6 md:p-8 lg:p-12 flex items-center justify-center bg-gradient-to-br from-accent-light/30 to-warm-light/30">
+              <div className="relative w-full max-w-md">
+                <div className="w-full aspect-square relative rounded-2xl overflow-hidden shadow-xl">
+                  {currentPageData.imageUrl ? (
+                    <Image
+                      src={currentPageData.imageUrl}
+                      alt="Story illustration"
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-cover"
+                      priority
+                      onError={(e) => {
+                        console.error('Image failed to load:', currentPageData.imageUrl);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-accent-light to-warm-light flex items-center justify-center">
+                      <div className="text-center text-text-arabic/60">
+                        <div className="text-4xl mb-2">🖼️</div>
+                        <div className="text-sm">جاري تحميل الصورة...</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Text Content */}
+            <div className="lg:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-center">
+              <motion.div
+                key={currentPage}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+                {...({} as any)}
+              >
+                {/* Arabic Text */}
+                <div className="min-h-[200px] md:min-h-[250px] flex flex-col justify-center overflow-hidden">
+                  <div className={cn(
+                    "arabic-text leading-relaxed text-text-arabic font-[Amiri,serif] text-center overflow-hidden",
+                    currentPage === 0 
+                      ? "text-2xl md:text-3xl lg:text-4xl font-bold" 
+                      : "text-xl md:text-2xl lg:text-3xl font-semibold"
+                  )} style={{ 
+                    fontWeight: currentPage === 0 ? 800 : 600, 
+                    letterSpacing: '-0.01em',
+                    lineHeight: '1.8',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word'
+                  }}>
                     {cleanChapterText(currentPageData.arabicText)}
                   </div>
-                ) : (
-                  <div className="arabic-text text-2xl md:text-3xl leading-relaxed text-text-arabic font-[Noto Sans Arabic,sans-serif] text-center" style={{ fontWeight: 600, letterSpacing: '-0.01em', maxWidth: '95%', wordBreak: 'break-word', overflowWrap: 'break-word', color: '#7c4a03' }}>
-                    {cleanChapterText(currentPageData.arabicText)}
-                  </div>
-                )}
-                {/* Real Translate and Listen buttons */}
-                <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-14">
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
                   <button
                     onClick={() => setShowTranslation(v => !v)}
-                    className="px-6 py-2 rounded-full bg-blue-200 text-blue-900 font-bold shadow hover:bg-blue-300 transition-all text-lg flex items-center gap-2"
+                    className={cn(
+                      "px-4 py-2 rounded-full font-medium shadow transition-all text-sm flex items-center gap-2 min-w-[140px] justify-center",
+                      showTranslation 
+                        ? "bg-blue-100 text-blue-800 border border-blue-200" 
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                    )}
                   >
-                    <Globe className="w-5 h-5" />
-                    {showTranslation ? 'إخفاء الترجمة' : 'ترجمة إلى الإنجليزية'}
+                    <Globe className="w-4 h-4" />
+                    <span className="whitespace-nowrap">
+                      {showTranslation ? 'إخفاء الترجمة' : 'ترجمة'}
+                    </span>
                   </button>
+                  
                   <button
                     onClick={() => handlePlayAudio(currentPageData)}
                     disabled={isPlaying || isGeneratingAudio}
                     className={cn(
-                      "px-6 py-2 rounded-full font-bold shadow transition-all text-lg flex items-center gap-2",
+                      "px-4 py-2 rounded-full font-medium shadow transition-all text-sm flex items-center gap-2 min-w-[140px] justify-center",
                       isGeneratingAudio
-                        ? "bg-blue-400 text-white cursor-not-allowed"
+                        ? "bg-gray-400 text-white cursor-not-allowed"
                         : isPlaying
                         ? "bg-green-500 text-white animate-pulse"
-                        : "bg-orange-400 text-white hover:bg-orange-500"
+                        : "bg-orange-500 text-white hover:bg-orange-600"
                     )}
                   >
                     {isGeneratingAudio ? (
@@ -341,12 +422,14 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                     ) : (
                       <Volume2 className={cn(isPlaying && "animate-pulse")}/>
                     )}
-                    {isGeneratingAudio
-                      ? 'جاري إنشاء الصوت...'
-                      : isPlaying
-                      ? 'يتم التشغيل...'
-                      : 'استمع للنص'
-                    }
+                    <span className="whitespace-nowrap">
+                      {isGeneratingAudio
+                        ? 'جاري إنشاء...'
+                        : isPlaying
+                        ? 'يتم التشغيل...'
+                        : 'استمع'
+                      }
+                    </span>
                   </button>
                 </div>
                 
@@ -356,7 +439,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center"
+                    className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-center"
                     {...({} as any)}
                   >
                     <p className="text-red-700 text-sm font-medium">
@@ -365,92 +448,81 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                   </motion.div>
                 )}
                 
-                {/* Mock English translation */}
+                {/* English Translation */}
                 {showTranslation && (
-                  <div className="english-text text-lg md:text-xl bg-warm-light/60 p-4 rounded-xl mt-2 text-center font-semibold text-text-english" style={{ maxWidth: '95%', margin: '0 auto' }}>
-                    {currentPageData.englishText
-                      ? currentPageData.englishText
-                      : 'Translating...'}
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="mt-4 p-4 bg-warm-light/60 rounded-xl border border-warm/30"
+                    {...({} as any)}
+                  >
+                    <div className="english-text text-base md:text-lg text-text-english font-medium leading-relaxed">
+                      {currentPageData.englishText
+                        ? currentPageData.englishText
+                        : 'Translating...'}
+                    </div>
+                  </motion.div>
                 )}
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Navigation Footer */}
+          <div className="bg-warm-light/40 border-t border-warm/20 p-4 md:p-6">
+            <div className="flex items-center justify-between">
+              {/* Previous Button */}
+              <button
+                onClick={handlePrevPage}
+                disabled={isFirstPage}
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 text-sm font-medium",
+                  isFirstPage
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-primary hover:bg-primary/10"
+                )}
+              >
+                <ChevronRight className="w-4 h-4" />
+                السابق
+              </button>
+
+              {/* Page Progress */}
+              <div className="flex items-center gap-2">
+                {story.pages.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      index === currentPage
+                        ? "bg-primary scale-125"
+                        : "bg-primary/30"
+                    )}
+                  />
+                ))}
               </div>
-            </motion.div></div>
-          </div>
-          {/* Center spine */}
-          <div className="hidden md:block w-3 relative z-20">
-            <div className="absolute left-1/2 top-0 h-full w-1 bg-gradient-to-b from-[#e2cfa1] via-[#fff8dc] to-[#e2cfa1] rounded-full shadow-lg opacity-80" style={{ filter: 'blur(1.5px)' }} />
-          </div>
-          {/* Left page (image) */}
-          <div className="flex-1 flex flex-col justify-center items-center px-10 py-14 md:py-20 md:pl-20 md:pr-14">
-            <div className="relative w-full max-w-sm flex justify-center items-center">
-              <Image
-                src={currentPageData.imageUrl}
-                alt="Story illustration"
-                width={400}
-                height={300}
-                className="rounded-2xl shadow-lg w-full h-auto"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Navigation */}
-        <div className="bg-warm-light/30 p-6 border-t border-warm/20">
-          <div className="flex items-center justify-between">
-            {/* Previous Button */}
-            <button
-              onClick={handlePrevPage}
-              disabled={isFirstPage}
-              className={cn(
-                "inline-flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
-                isFirstPage
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-primary hover:bg-primary/10"
+              {/* Next/Finish Button */}
+              {isLastPage ? (
+                <button
+                  onClick={() => setShowCompletion(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300 text-sm font-bold shadow-lg"
+                >
+                  انتهت القصة
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleNextPage}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-full transition-all duration-300 text-sm font-medium"
+                >
+                  التالي
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
               )}
-            >
-              {/* التالي */}
-              <ChevronRight className="w-5 h-5" />
-              السابق
-              
-            </button>
-
-            {/* Page Indicator */}
-            <div className="flex items-center gap-2">
-              {story.pages.map((_, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "w-3 h-3 rounded-full transition-all duration-300",
-                    index === currentPage
-                      ? "bg-primary"
-                      : "bg-primary/30"
-                  )}
-                />
-              ))}
             </div>
-
-            {/* Next/Finish Button */}
-            {isLastPage ? (
-              <button
-                onClick={() => setShowCompletion(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-full hover:scale-105 transition-all duration-300 text-xl font-bold"
-              >
-                انتهت القصة
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={handleNextPage}
-                className="inline-flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-full transition-all duration-300"
-              >
-                {/* السابق */}
-                التالي
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 } 
